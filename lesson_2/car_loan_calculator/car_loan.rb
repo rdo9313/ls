@@ -1,4 +1,5 @@
 # Car Loan Payment Calculator
+require 'pry'
 def prompt(message)
   puts "=> #{message}"
 end
@@ -6,6 +7,8 @@ end
 def play_again?(answer)
   if answer.downcase == "n"
     return false
+  elsif answer.downcase == "y"
+    return true
   end
 
   valid_answer = ""
@@ -15,13 +18,7 @@ def play_again?(answer)
     break if valid_answer.downcase == "y" || valid_answer.downcase == "n"
   end
 
-  if valid_answer.downcase == "n"
-    return false
-  else
-    return true
-  end
-
-  return true
+  return valid_answer.downcase == "n" ? false : true
 end
 
 def valid_apr?(apr)
