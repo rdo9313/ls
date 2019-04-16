@@ -1,5 +1,4 @@
 # Car Loan Payment Calculator
-require 'pry'
 def prompt(message)
   puts "=> #{message}"
 end
@@ -18,7 +17,7 @@ def play_again?(answer)
     break if valid_answer.downcase == "y" || valid_answer.downcase == "n"
   end
 
-  return valid_answer.downcase == "n" ? false : true
+  valid_answer.downcase == "n" ? false : true
 end
 
 def valid_apr?(apr)
@@ -26,7 +25,8 @@ def valid_apr?(apr)
 end
 
 def valid_loan_amt?(loan_amt)
-  loan_amt.to_f.to_s != "0.0" && /\d/.match(loan_amt) && /^\d*\.?\d*$/.match(loan_amt)
+  loan_amt.to_f.to_s != "0.0" &&
+    /\d/.match(loan_amt) && /^\d*\.?\d*$/.match(loan_amt)
 end
 
 def valid_duration?(integer)
@@ -71,8 +71,29 @@ def display_monthly_payment(monthly_payment)
 end
 
 def display_end
-  prompt("----------------------------------------------------------------------")
-  prompt("Thank you for using the car loan calculator. Hope you found it useful!")
+  prompt("--------------------------------------------------------------------")
+  prompt("Thanks for using the car loan calculator. Hope you found it useful!")
+end
+
+def retrieve_loan_amt
+  gets.chomp
+end
+
+def retrieve_apr
+  gets.chomp
+end
+
+def retrieve_duration
+  gets.chomp
+end
+
+def retrieve_replay_answer
+  gets.chomp
+end
+
+def calculate_payment(loan_amt, monthly_rate, loan_duration)
+  form = (loan_amt * (monthly_rate / (1 - (1 + monthly_rate)**-loan_duration)))
+  form.round(2)
 end
 
 display_welcome
@@ -81,7 +102,7 @@ loop do
   loan_amt = ""
   request_loan_amt
   loop do
-    loan_amt = gets.chomp
+    loan_amt = retrieve_loan_amt
 
     if valid_loan_amt?(loan_amt)
       loan_amt = loan_amt.to_f
@@ -94,7 +115,7 @@ loop do
   monthly_rate = ""
   request_apr
   loop do
-    apr = gets.chomp
+    apr = retrieve_apr
 
     if valid_apr?(apr)
       monthly_rate = apr.to_f / 1200
@@ -107,7 +128,7 @@ loop do
   loan_duration = ""
   request_duration
   loop do
-    loan_duration = gets.chomp
+    loan_duration = retrieve_duration
 
     if valid_duration?(loan_duration)
       loan_duration = loan_duration.to_i
@@ -117,12 +138,12 @@ loop do
     end
   end
 
-  form = (loan_amt * (monthly_rate / (1 - (1 + monthly_rate)**-loan_duration)))
-  monthly_payment = form.round(2)
+  monthly_payment = calculate_payment(loan_amt, monthly_rate, loan_duration)
 
   display_monthly_payment(monthly_payment)
   request_replay
-  answer = gets.chomp
+  answer = retrieve_replay_answer
   break unless play_again?(answer)
 end
+
 display_end
