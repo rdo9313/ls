@@ -1,4 +1,5 @@
-VALID_CHOICES = %w(rock scissors paper lizard spock r s p l sp)
+# RPS Bonus Features
+VALID_CHOICES = %w(rock scissors paper lizard spock)
 RPS_HASH = {
   rock:  %w(scissors lizard),
   scissors: %w(paper lizard),
@@ -6,24 +7,30 @@ RPS_HASH = {
   spock: %w(scissors rock),
   lizard: %w(spock paper)
 }
-CONVERT = {
-  "r" => "rock",
-  "s" => "scissors",
-  "p" => "paper",
-  "sp" => "spock",
-  "l" => "lizard"
-}
 
 def prompt(message)
   puts("=> #{message}")
 end
 
+def convert(choice)
+  case choice
+  when "r"
+    "rock"
+  when "p"
+    "paper"
+  when "s"
+    "scissors"
+  when "l"
+    "lizard"
+  when "sp"
+    "spock"
+  else
+    choice
+  end
+end
+
 def win?(first, second)
-  (first == 'rock' && RPS_HASH[:rock].include?(second)) ||
-    (first == 'paper' && RPS_HASH[:paper].include?(second)) ||
-    (first == 'scissors' && RPS_HASH[:scissors].include?(second)) ||
-    (first == 'spock' && RPS_HASH[:spock].include?(second)) ||
-    (first == 'lizard' && RPS_HASH[:lizard].include?(second))
+  RPS_HASH[first.to_sym].include?(second)
 end
 
 def choice_valid?(choice)
@@ -41,33 +48,33 @@ def display_result(player, computer)
   end
 end
 
-def increment_wins(player, computer, win_count)
+def increment_wins(player, computer, score)
   if win?(player, computer)
-    win_count[:player] += 1
+    score[:player] += 1
   elsif win?(computer, player)
-    win_count[:computer] += 1
+    score[:computer] += 1
   end
 end
 
 def play_again?(answer)
+  valid_answer = ""
   if answer.downcase == "n"
     return false
   elsif answer.downcase == "y"
     return true
-  end
-
-  valid_answer = ""
-  while answer.downcase != "y" || answer.downcase != "n"
-    prompt("Enter Y to play again, N to quit")
-    valid_answer = gets.chomp
-    break if valid_answer.downcase == "y" || valid_answer.downcase == "n"
+  else
+    loop do
+      prompt("Enter Y to play again, N to quit")
+      valid_answer = gets.chomp
+      break if valid_answer.downcase == "y" || valid_answer.downcase == "n"
+    end
   end
 
   valid_answer.downcase == "n" ? false : true
 end
 
-def has_winner?(win_count)
-  win_count.has_value?(2)
+def winner?(score)
+  score.value?(5)
 end
 
 def display_choices
@@ -82,14 +89,17 @@ def display_goodbye
   prompt("Thank you for playing. Good bye!")
 end
 
-def display_score(win_count)
-  if !win_count.has_value?(2)
-    if win_count[:player] > win_count[:computer]
-      prompt("Player is winning, #{win_count[:player]} : #{win_count[:computer]}")
-    elsif win_count[:computer] > win_count[:player]
-      prompt("Computer is winning, #{win_count[:computer]} : #{win_count[:player]}")
+def display_score(score)
+  if !score.value?(5)
+    if score[:player] > score[:computer]
+      prompt("Player is winning, #{score[:player]} : #{score[:computer]}")
+      prompt("----------------------------------------------------------")
+    elsif score[:computer] > score[:player]
+      prompt("Computer is winning, #{score[:computer]} : #{score[:player]}")
+      prompt("------------------------------------------------------------")
     else
-      prompt("We are tied at #{win_count[:player]} : #{win_count[:computer]}!")
+      prompt("We are tied at #{score[:player]} : #{score[:computer]}!")
+      prompt("-------------------------------------------------------")
     end
   end
 end
@@ -107,19 +117,19 @@ def retrieve_user_choice
 end
 
 def retrieve_computer_choice
-  RPS_HASH.keys.map { |key| key.to_s }.sample
+  VALID_CHOICES.sample
 end
 
 loop do
-  win_count = {player: 0, computer: 0}
+  score = { player: 0, computer: 0 }
   loop do
     choice = ""
     loop do
       display_choices
       choice = retrieve_user_choice
+      choice = convert(choice)
 
       if choice_valid?(choice)
-        choice = CONVERT[choice]
         break
       else
         display_invalid_choice
@@ -129,10 +139,10 @@ loop do
     computer_choice = retrieve_computer_choice
 
     display_result(choice, computer_choice)
-    increment_wins(choice, computer_choice, win_count)
-    display_score(win_count)
+    increment_wins(choice, computer_choice, score)
+    display_score(score)
 
-    break if has_winner?(win_count)
+    break if winner?(score)
   end
 
   request_replay
