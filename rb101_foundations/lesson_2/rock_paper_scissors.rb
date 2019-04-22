@@ -13,7 +13,7 @@ def prompt(message)
 end
 
 def convert(choice)
-  case choice
+  case choice.downcase
   when "r"
     "rock"
   when "p"
@@ -37,26 +37,36 @@ def choice_valid?(choice)
   VALID_CHOICES.include?(choice)
 end
 
-def display_result(player, computer)
-  prompt("You chose: #{player}, Computer chose: #{computer}")
+def determine_winner(player, computer)
   if win?(player, computer)
-    prompt("You won!")
+    "player"
   elsif win?(computer, player)
+    "computer"
+  end
+end
+
+def display_result(winner, player, computer)
+  prompt("You chose: #{player}, Computer chose: #{computer}")
+  if winner == "player"
+    prompt("You won!")
+  elsif winner == "computer"
     prompt("Computer won!")
   else
     prompt("It's a tie!")
   end
 end
 
-def increment_wins(player, computer, score)
-  if win?(player, computer)
+def increment_wins(winner, score)
+  if winner == "player"
     score[:player] += 1
-  elsif win?(computer, player)
+  elsif winner == "computer"
     score[:computer] += 1
   end
 end
 
-def play_again?(answer)
+def play_again?
+  request_replay()
+  answer = gets.chomp
   valid_answer = ""
   if answer.downcase == "n"
     return false
@@ -108,12 +118,9 @@ def request_replay
   prompt("Do you want to play again?(Y for yes, N for no)")
 end
 
-def retrieve_replay_answer
-  gets.chomp
-end
-
 def retrieve_user_choice
-  gets.chomp
+  choice = gets.chomp
+  convert(choice)
 end
 
 def retrieve_computer_choice
@@ -121,13 +128,14 @@ def retrieve_computer_choice
 end
 
 loop do
+  system("clear")
   score = { player: 0, computer: 0 }
   loop do
+    system("clear")
     choice = ""
     loop do
       display_choices
       choice = retrieve_user_choice
-      choice = convert(choice)
 
       if choice_valid?(choice)
         break
@@ -138,17 +146,16 @@ loop do
 
     computer_choice = retrieve_computer_choice
 
-    display_result(choice, computer_choice)
-    increment_wins(choice, computer_choice, score)
+    winner = determine_winner(choice, computer_choice)
+    display_result(winner, choice, computer_choice)
+    increment_wins(winner, score)
     display_score(score)
+    sleep(2)
 
     break if winner?(score)
   end
 
-  request_replay
-  answer = retrieve_replay_answer
-
-  break unless play_again?(answer)
+  break unless play_again?
 end
 
 display_goodbye
