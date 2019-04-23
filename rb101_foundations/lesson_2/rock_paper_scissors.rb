@@ -65,7 +65,7 @@ def increment_wins(winner, score)
 end
 
 def play_again?
-  request_replay()
+  request_replay
   answer = gets.chomp
   valid_answer = ""
   if answer.downcase == "n"
@@ -119,8 +119,14 @@ def request_replay
 end
 
 def retrieve_user_choice
-  choice = gets.chomp
-  convert(choice)
+  choice = ""
+  loop do
+    display_choices
+    choice = convert(gets.chomp)
+    break if choice_valid?(choice)
+    display_invalid_choice
+  end
+  choice
 end
 
 def retrieve_computer_choice
@@ -132,18 +138,7 @@ loop do
   score = { player: 0, computer: 0 }
   loop do
     system("clear")
-    choice = ""
-    loop do
-      display_choices
-      choice = retrieve_user_choice
-
-      if choice_valid?(choice)
-        break
-      else
-        display_invalid_choice
-      end
-    end
-
+    choice = retrieve_user_choice
     computer_choice = retrieve_computer_choice
 
     winner = determine_winner(choice, computer_choice)
