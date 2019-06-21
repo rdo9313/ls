@@ -8,6 +8,8 @@ WINNING_LINES = [[1, 2, 3], [4, 5, 6], [7, 8, 9]] +
 INITIAL_MARKER = ' '
 PLAYER_MARKER = 'X'
 COMPUTER_MARKER = 'O'
+FIRST_PLAYER = "choose"
+VALID_CHOICES = %w(choose player computer)
 
 def prompt(msg)
   puts "=> #{msg}"
@@ -65,8 +67,29 @@ def player_places_piece!(brd)
   brd[square] = PLAYER_MARKER
 end
 
+def find_at_risk_square(line, brd)
+  if brd.values_at(*line).count(COMPUTER_MARKER) == 2
+    brd.select { |k,v| line.include?(k) && v == INITIAL_MARKER }.keys.first
+  elsif brd.values_at(*line).count(PLAYER_MARKER) == 2
+    brd.select { |k,v| line.include?(k) && v == INITIAL_MARKER }.keys.first
+  else
+    nil
+  end
+end
+
 def computer_places_piece!(brd)
-  square = empty_squares(brd).sample
+  square = nil
+  WINNING_LINES.each do |line|
+    square = find_at_risk_square(line, brd)
+    break if square
+  end
+
+  if brd[5] == " "
+    square = 5
+  elsif !square
+    square = empty_squares(brd).sample
+  end
+
   brd[square] = COMPUTER_MARKER
 end
 
@@ -89,17 +112,39 @@ def detect_winner(brd)
   nil
 end
 
+def determine_first_player
+  choice = ''
+  loop do
+    prompt "Do you want to play first? ('y' or 'n')"
+    choice = gets.chomp.downcase
+    prompt "I didn't understand, please input a valid answer ('y' or 'n')"
+    break if choice == "y" || choice == "n"
+  end
+  choice == 'y' ? 'player' : 'computer'
+end
+
+def alternate_player(player)
+  player == "player" ? "computer" : "player"
+end
+
 loop do
   score = { player: 0, computer: 0 }
   loop do
     board = initialize_board
+    if FIRST_PLAYER == "choose"
+      starting_player = determine_first_player
+    elsif VALID_CHOICES.include?(FIRST_PLAYER)
+      starting_player = FIRST_PLAYER
+    end
     loop do
       display_board(board)
 
-      player_places_piece!(board)
-      break if someone_won?(board) || board_full?(board)
-
-      computer_places_piece!(board)
+      if starting_player == "player"
+        player_places_piece!(board)
+      elsif starting_player == "computer"
+        computer_places_piece!(board)
+      end
+      starting_player = alternate_player(starting_player)
       break if someone_won?(board) || board_full?(board)
     end
 
