@@ -8,7 +8,7 @@ WINNING_LINES = [[1, 2, 3], [4, 5, 6], [7, 8, 9]] +
 INITIAL_MARKER = ' '
 PLAYER_MARKER = 'X'
 COMPUTER_MARKER = 'O'
-FIRST_PLAYER = "choose"
+FIRST_PLAYER = "player"
 VALID_CHOICES = %w(choose player computer)
 
 def prompt(msg)
@@ -69,9 +69,9 @@ end
 
 def find_at_risk_square(line, brd)
   if brd.values_at(*line).count(COMPUTER_MARKER) == 2
-    brd.select { |k,v| line.include?(k) && v == INITIAL_MARKER }.keys.first
+    brd.select { |k, v| line.include?(k) && v == INITIAL_MARKER }.keys.first
   elsif brd.values_at(*line).count(PLAYER_MARKER) == 2
-    brd.select { |k,v| line.include?(k) && v == INITIAL_MARKER }.keys.first
+    brd.select { |k, v| line.include?(k) && v == INITIAL_MARKER }.keys.first
   else
     nil
   end
@@ -123,49 +123,80 @@ def determine_first_player
   choice == 'y' ? 'player' : 'computer'
 end
 
+def place_piece!(brd, current_player)
+  current_player == "player" ? player_places_piece!(brd) : computer_places_piece!(brd)
+end
+
+def set(current_player)
+  if FIRST_PLAYER == "choose"
+    current_player << determine_first_player
+  elsif VALID_CHOICES.include?(FIRST_PLAYER)
+    current_player << FIRST_PLAYER
+  end
+end
+
 def alternate_player(player)
   player == "player" ? "computer" : "player"
 end
 
+def announce_winner(brd)
+  if detect_winner(brd) == "Player"
+    prompt "#{detect_winner(brd)} won!"
+  elsif detect_winner(brd) == "Computer"
+    prompt "#{detect_winner(brd)} won!"
+  else
+    prompt "It's a tie!"
+  end
+  sleep 2
+end
+
+def increment_score(brd, score)
+  if detect_winner(brd) == "Player"
+    score[:player] += 1
+  elsif detect_winner(brd) == "Computer"
+    score[:computer] += 1
+  end
+end
+
+def play_again?
+  prompt "Play again? (y or n)"
+  answer = gets.chomp.downcase
+  valid_answer = ""
+  if answer == "y"
+    return true
+  elsif answer == "n"
+    return false
+  else
+    loop do
+      prompt "Not a valid answer. Type y or n."
+      valid_answer = gets.chomp.downcase
+      break if valid_answer == "y" || valid_answer == "n"
+    end
+  end
+  valid_answer == "n" ? false : true
+end
+
 loop do
   score = { player: 0, computer: 0 }
+  current_player = ""
+  set(current_player)
   loop do
     board = initialize_board
-    if FIRST_PLAYER == "choose"
-      starting_player = determine_first_player
-    elsif VALID_CHOICES.include?(FIRST_PLAYER)
-      starting_player = FIRST_PLAYER
-    end
     loop do
       display_board(board)
-
-      if starting_player == "player"
-        player_places_piece!(board)
-      elsif starting_player == "computer"
-        computer_places_piece!(board)
-      end
-      starting_player = alternate_player(starting_player)
+      place_piece!(board, current_player)
+      current_player = alternate_player(current_player)
       break if someone_won?(board) || board_full?(board)
     end
 
     display_board(board)
-
-    if detect_winner(board) == "Player"
-      prompt "#{detect_winner(board)} won!"
-      score[:player] += 1
-    elsif detect_winner(board) == "Computer"
-      prompt "#{detect_winner(board)} won!"
-      score[:computer] += 1
-    else
-      prompt "It's a tie!"
-    end
+    announce_winner(board)
+    increment_score(board, score)
 
     break if score.value?(5)
   end
 
-  prompt "Play again? (y or n)"
-  answer = gets.chomp
-  break unless answer.downcase.start_with?('y')
+  break unless play_again?
 end
 
 prompt "Thanks for playing Tice Tac Toe! Good bye!"
