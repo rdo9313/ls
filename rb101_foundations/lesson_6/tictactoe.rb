@@ -8,16 +8,18 @@ WINNING_LINES = [[1, 2, 3], [4, 5, 6], [7, 8, 9]] +
 INITIAL_MARKER = ' '
 PLAYER_MARKER = 'X'
 COMPUTER_MARKER = 'O'
-FIRST_PLAYER = "player"
+FIRST_PLAYER = "choose"
 VALID_CHOICES = %w(choose player computer)
+WINNING_ROUNDS = 2
 
 def prompt(msg)
   puts "=> #{msg}"
 end
 
-# rubocop: disable Metrics/AbcSize
+# rubocop: disable Metrics/AbcSize, Metrics/MethodLength
 def display_board(brd)
   system("clear")
+  puts "The first to #{WINNING_ROUNDS} wins this match."
   puts "You're a #{PLAYER_MARKER}. Computer is #{COMPUTER_MARKER}."
   puts ""
   puts "     |     |"
@@ -33,7 +35,7 @@ def display_board(brd)
   puts "     |     |"
   puts ""
 end
-# rubocop: enable Metrics/AbcSize
+# rubocop: enable Metrics/AbcSize, Metrics/MethodLength
 
 def initialize_board
   new_board = {}
@@ -60,11 +62,11 @@ def player_places_piece!(brd)
   square = ""
   loop do
     prompt "Choose a square (#{joinor(empty_squares(brd))}):"
-    square = gets.chomp.to_i
+    square = gets.chomp.to_f
     break if empty_squares(brd).include?(square)
     prompt "Sorry, that's not a valid choice."
   end
-  brd[square] = PLAYER_MARKER
+  brd[square.truncate] = PLAYER_MARKER
 end
 
 def find_at_risk_square(line, brd)
@@ -72,8 +74,6 @@ def find_at_risk_square(line, brd)
     brd.select { |k, v| line.include?(k) && v == INITIAL_MARKER }.keys.first
   elsif brd.values_at(*line).count(PLAYER_MARKER) == 2
     brd.select { |k, v| line.include?(k) && v == INITIAL_MARKER }.keys.first
-  else
-    nil
   end
 end
 
@@ -117,14 +117,14 @@ def determine_first_player
   loop do
     prompt "Do you want to play first? ('y' or 'n')"
     choice = gets.chomp.downcase
-    prompt "I didn't understand, please input a valid answer ('y' or 'n')"
     break if choice == "y" || choice == "n"
+    prompt "I didn't understand, please input a valid answer..."
   end
   choice == 'y' ? 'player' : 'computer'
 end
 
-def place_piece!(brd, current_player)
-  current_player == "player" ? player_places_piece!(brd) : computer_places_piece!(brd)
+def place_piece!(brd, plyr)
+  plyr == "player" ? player_places_piece!(brd) : computer_places_piece!(brd)
 end
 
 def set(current_player)
@@ -139,15 +139,8 @@ def alternate_player(player)
   player == "player" ? "computer" : "player"
 end
 
-def announce_winner(brd)
-  if detect_winner(brd) == "Player"
-    prompt "#{detect_winner(brd)} won!"
-  elsif detect_winner(brd) == "Computer"
-    prompt "#{detect_winner(brd)} won!"
-  else
-    prompt "It's a tie!"
-  end
-  sleep 2
+def announce_winner(score)
+  prompt "#{score.key(WINNING_ROUNDS).capitalize} won!"
 end
 
 def increment_score(brd, score)
@@ -156,6 +149,21 @@ def increment_score(brd, score)
   elsif detect_winner(brd) == "Computer"
     score[:computer] += 1
   end
+end
+
+def display_score(score)
+  if score[:player] > score[:computer]
+    prompt "Player is winning #{score[:player]}:#{score[:computer]}!"
+  elsif score[:computer] > score[:player]
+    prompt "Computer is winning #{score[:computer]}:#{score[:player]}!"
+  else
+    prompt "It's a tie #{score[:player]}:#{score[:computer]}!"
+  end
+end
+
+def continue
+  prompt "Press enter to continue..."
+  gets.chomp
 end
 
 def play_again?
@@ -190,12 +198,13 @@ loop do
     end
 
     display_board(board)
-    announce_winner(board)
     increment_score(board, score)
 
-    break if score.value?(5)
+    break if score.value?(WINNING_ROUNDS)
+    display_score(score)
+    continue
   end
-
+  announce_winner(score)
   break unless play_again?
 end
 
