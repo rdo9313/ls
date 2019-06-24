@@ -25,17 +25,17 @@ def deal(deck, user, dealer)
   end
 end
 
-def display_user(hand)
+def display_all(player, hand)
   cards = ""
   hand.each { |card| cards << card.join + " " }
-  prompt "You have #{cards.strip}."
+  prompt "#{player} has #{cards.strip}."
 end
 
-def display_dealer(hand)
+def display_dealer_one(hand)
   prompt "Dealer has #{hand[0].join} and an unknown card."
 end
 
-def display_total(hand)
+def calculate_total(hand)
   values = hand.map { |card| card[0] }
   sum = 0
   values.each do |value|
@@ -54,12 +54,17 @@ def display_total(hand)
   sum
 end
 
+def display_total(player, hand)
+  prompt "#{player}'s hand total is #{calculate_total(hand)}."
+end
+
 def request_action
   prompt "Would you like to (h)it or (s)tay?"
   gets.chomp.downcase
 end
 
-def request_valid_action(action)
+def request_valid_action
+  action = ''
   loop do
     prompt "Please input a valid action:"
     action = gets.chomp.downcase
@@ -68,8 +73,27 @@ def request_valid_action(action)
   action
 end
 
+def busted?(hand)
+  calculate_total(hand) > 21
+end
+
+def hit_21?(hand)
+  calculate_total(hand) == 21
+end
+
 def valid_action?(action)
   VALID_CHOICES.include?(action)
+end
+
+def play_again?
+  answer = ""
+  loop do
+    prompt "Would you like to play again? ('y' or 'n'):"
+    answer = gets.chomp.downcase
+    break if answer == "y" || answer == "n"
+    prompt "Please enter a valid input ('y' or 'n'):"
+  end
+  answer == "y"
 end
 
 loop do
@@ -77,14 +101,31 @@ loop do
   user_hand = []
   dealer_hand = []
   deal(deck, user_hand, dealer_hand)
+  display_dealer_one(dealer_hand)
   loop do
-    display_user(user_hand)
-    display_dealer(dealer_hand)
-    display_total(user_hand)
+    display_all("Player", user_hand)
+    display_total("Player", user_hand)
+    break if busted?(user_hand) || hit_21?(user_hand)
     action = request_action
-    request_valid_action(action) if !valid_action?(action)
-    if action == "h" || action == "hit"
-      user_hand << deck.pop
-    end
+    action = request_valid_action unless valid_action?(action)
+    break if ['s', 'stay'].include?(action)
+    user_hand << deck.pop
   end
+
+  if busted?(user_hand)
+    prompt "Dealer wins!"
+    break unless play_again?
+  elsif hit_21?(user_hand)
+    prompt "Player hit the nuts (21 points). Great job!"
+  else
+    prompt "Player chose to stay!"
+  end
+
+  loop do
+    display_all("Dealer", dealer_hand)
+    display_total("Dealer", dealer_hand)
+    break if calculate_total(dealer_hand) >= 17
+    dealer_hand << deck.pop
+  end
+
 end
