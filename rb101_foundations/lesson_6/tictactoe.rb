@@ -1,7 +1,3 @@
-# rubocop: disable Style/EndOfLine
-require 'pry'
-# rubocop: enable Style/EndOfLine
-
 WINNING_LINES = [[1, 2, 3], [4, 5, 6], [7, 8, 9]] +
                 [[2, 5, 8], [1, 4, 7], [3, 6, 9]] +
                 [[1, 5, 9], [3, 5, 7]]
@@ -69,22 +65,36 @@ def player_places_piece!(brd)
   brd[square.truncate] = PLAYER_MARKER
 end
 
-def find_at_risk_square(line, brd)
-  if brd.values_at(*line).count(COMPUTER_MARKER) == 2
-    brd.select { |k, v| line.include?(k) && v == INITIAL_MARKER }.keys.first
-  elsif brd.values_at(*line).count(PLAYER_MARKER) == 2
-    brd.select { |k, v| line.include?(k) && v == INITIAL_MARKER }.keys.first
+def find_winning_square(square, brd)
+  WINNING_LINES.each do |line|
+    if brd.values_at(*line).count(COMPUTER_MARKER) == 2
+      square = brd.select do |k, v|
+        line.include?(k) && v == INITIAL_MARKER
+      end.keys.first
+    end
+    break if square
   end
+  square
+end
+
+def find_defending_square(square, brd)
+  WINNING_LINES.each do |line|
+    if brd.values_at(*line).count(PLAYER_MARKER) == 2
+      square = brd.select do |k, v|
+        line.include?(k) && v == INITIAL_MARKER
+      end.keys.first
+    end
+    break if square
+  end
+  square
 end
 
 def computer_places_piece!(brd)
   square = nil
-  WINNING_LINES.each do |line|
-    square = find_at_risk_square(line, brd)
-    break if square
-  end
+  square = find_winning_square(square, brd)
+  square = find_defending_square(square, brd) if !square
 
-  if brd[5] == " "
+  if brd[5] == " " && !square
     square = 5
   elsif !square
     square = empty_squares(brd).sample
@@ -112,14 +122,25 @@ def detect_winner(brd)
   nil
 end
 
-def determine_first_player
-  choice = ''
+def go_first?
+  prompt "Do you want to play first? ('y' or 'n')"
+  gets.chomp.downcase
+end
+
+def valid_answer?(choice)
+  choice == "y" || choice == "n" ? true : false
+end
+
+def request_valid_answer(choice)
   loop do
-    prompt "Do you want to play first? ('y' or 'n')"
+    prompt "I didn't understand, please input a valid answer..."
     choice = gets.chomp.downcase
     break if choice == "y" || choice == "n"
-    prompt "I didn't understand, please input a valid answer..."
   end
+  choice
+end
+
+def determine_first_player(choice)
   choice == 'y' ? 'player' : 'computer'
 end
 
@@ -127,11 +148,13 @@ def place_piece!(brd, plyr)
   plyr == "player" ? player_places_piece!(brd) : computer_places_piece!(brd)
 end
 
-def set(current_player)
+def set_current_player!
   if FIRST_PLAYER == "choose"
-    current_player << determine_first_player
+    choice = go_first?
+    request_valid_answer(choice) if !valid_answer?(choice)
+    determine_first_player(choice)
   elsif VALID_CHOICES.include?(FIRST_PLAYER)
-    current_player << FIRST_PLAYER
+    FIRST_PLAYER
   end
 end
 
@@ -143,7 +166,7 @@ def announce_winner(score)
   prompt "#{score.key(WINNING_ROUNDS).capitalize} won!"
 end
 
-def increment_score(brd, score)
+def increment_score!(brd, score)
   if detect_winner(brd) == "Player"
     score[:player] += 1
   elsif detect_winner(brd) == "Computer"
@@ -166,28 +189,20 @@ def continue
   gets.chomp
 end
 
-def play_again?
+def request_replay
   prompt "Play again? (y or n)"
-  answer = gets.chomp.downcase
-  valid_answer = ""
-  if answer == "y"
-    return true
-  elsif answer == "n"
-    return false
-  else
-    loop do
-      prompt "Not a valid answer. Type y or n."
-      valid_answer = gets.chomp.downcase
-      break if valid_answer == "y" || valid_answer == "n"
-    end
-  end
-  valid_answer == "n" ? false : true
+  gets.chomp.downcase
+end
+
+def play_again?
+  answer = request_replay
+  request_valid_answer(answer) if !valid_answer?(answer)
+  answer == "y"
 end
 
 loop do
   score = { player: 0, computer: 0 }
-  current_player = ""
-  set(current_player)
+  current_player = set_current_player!
   loop do
     board = initialize_board
     loop do
@@ -198,7 +213,7 @@ loop do
     end
 
     display_board(board)
-    increment_score(board, score)
+    increment_score!(board, score)
 
     break if score.value?(WINNING_ROUNDS)
     display_score(score)
