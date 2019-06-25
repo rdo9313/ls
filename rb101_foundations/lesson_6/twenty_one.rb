@@ -180,7 +180,9 @@ loop do
   end
 
   player_result(player_total)
-  play_again? ? next : break if busted?(player_total)
+  if busted?(player_total)
+    play_again? ? next : break
+  end
 
   loop do
     dealer_total = calculate_total(dealer_hand)
