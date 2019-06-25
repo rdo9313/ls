@@ -122,20 +122,20 @@ def detect_winner(brd)
   nil
 end
 
-def go_first?
+def retrieve_player_choice
   prompt "Do you want to play first? ('y' or 'n')"
   gets.chomp.downcase
 end
 
 def valid_answer?(choice)
-  choice == "y" || choice == "n" ? true : false
+  choice == "y" || choice == "n"
 end
 
 def request_valid_answer(choice)
   loop do
     prompt "I didn't understand, please input a valid answer..."
     choice = gets.chomp.downcase
-    break if choice == "y" || choice == "n"
+    break if valid_answer?(choice)
   end
   choice
 end
@@ -150,7 +150,7 @@ end
 
 def set_current_player!
   if FIRST_PLAYER == "choose"
-    choice = go_first?
+    choice = retrieve_player_choice
     request_valid_answer(choice) if !valid_answer?(choice)
     determine_first_player(choice)
   elsif VALID_CHOICES.include?(FIRST_PLAYER)

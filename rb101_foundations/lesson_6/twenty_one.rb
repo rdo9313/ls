@@ -128,4 +128,6 @@ loop do
     dealer_hand << deck.pop
   end
 
+  # Need logic to determine winner based on higher calculated totals
+
 end
