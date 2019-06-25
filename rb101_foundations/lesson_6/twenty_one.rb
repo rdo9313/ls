@@ -1,11 +1,14 @@
-require 'pry'
-
 SUITS = %w(d s h c)
 VALUES = %w(2 3 4 5 6 7 8 9 10 J Q K A)
 VALID_CHOICES = %w(h s hit stay)
 
 def prompt(msg)
   puts "=> #{msg}"
+end
+
+def lined_prompt(msg)
+  puts "=> #{msg}"
+  puts "------------------------------------------------------------------"
 end
 
 def initialize_deck
@@ -18,14 +21,9 @@ def initialize_deck
   deck.shuffle
 end
 
-def dividing_line
-  puts "------------------------------------------------------------------"
-end
-
 def welcome_message
-  prompt "Welcome to Twenty-One! This is a simplified version of the very
+  lined_prompt "Welcome to Twenty-One! This is a simplified version of the very
   popular card game called Blackjack. Have fun!"
-  dividing_line
   sleep 3
 end
 
@@ -57,13 +55,13 @@ def calculate_total(hand)
   values = hand.map { |card| card[0] }
   sum = 0
   values.each do |value|
-    if value == "A"
-      sum += 11
-    elsif value.to_i == 0
-      sum += 10
-    else
-      sum += value.to_i
-    end
+    sum += if value == "A"
+             11
+           elsif value.to_i == 0
+             10
+           else
+             value.to_i
+           end
   end
 
   values.select { |value| value == "A" }.count.times do
@@ -72,110 +70,129 @@ def calculate_total(hand)
   sum
 end
 
-def display_total(player, hand)
-  prompt "#{player}'s hand total is #{calculate_total(hand)}."
+def display_total(player, total)
+  prompt "#{player}'s hand total is #{total}."
   sleep 1
 end
 
 def request_action
-  prompt "Would you like to (h)it or (s)tay?"
-  dividing_line
+  lined_prompt "Would you like to (h)it or (s)tay?"
   gets.chomp.downcase
 end
 
 def request_valid_action
   action = ''
   loop do
-    prompt "Please input a valid action:"
-    dividing_line
+    lined_prompt "Please input a valid action:"
     action = gets.chomp.downcase
     break if VALID_CHOICES.include?(action)
   end
   action
 end
 
-def busted?(hand)
-  calculate_total(hand) > 21
+def draw_message
+  prompt "Drawing a card..."
+  sleep 1
 end
 
-def hit_21?(hand)
-  calculate_total(hand) == 21
+def draw_card(hand, deck)
+  hand << deck.pop
+end
+
+def show_drawn(player, hand)
+  prompt "#{player} draws #{hand.last.join}."
+  sleep 1
+end
+
+def busted?(total)
+  total > 21
+end
+
+def hit_21?(total)
+  total == 21
 end
 
 def valid_action?(action)
   VALID_CHOICES.include?(action)
 end
 
+def valid_answer?(answer)
+  answer == "y" || answer == "n"
+end
+
+def player_result(total)
+  if busted?(total)
+    prompt "Player busted. Dealer wins!"
+  elsif hit_21?(total)
+    lined_prompt "Player hits the nuts (21 points). Great job!"
+    sleep 1
+  else
+    lined_prompt "Player chose to stay!"
+    sleep 1
+  end
+end
+
+def display_result(player_total, dealer_total)
+  if busted?(dealer_total)
+    prompt "Dealer busted. Player wins!"
+  elsif player_total > dealer_total
+    prompt "Player wins #{player_total}:#{dealer_total}!"
+  elsif dealer_total > player_total
+    prompt "Dealer wins #{dealer_total}:#{player_total}!"
+  else
+    prompt "It's a tie!"
+  end
+end
+
 def play_again?
   answer = ""
   loop do
-    prompt "Would you like to play again? ('y' or 'n'):"
-    dividing_line
+    lined_prompt "Would you like to play again? ('y' or 'n'):"
     answer = gets.chomp.downcase
-    break if answer == "y" || answer == "n"
-    prompt "Please enter a valid input ('y' or 'n'):"
-    dividing_line
+    break if valid_answer?(answer)
+    lined_prompt "Please enter a valid input ('y' or 'n'):"
   end
   answer == "y"
 end
 
-
 welcome_message
 loop do
-  shuffling_deck
-  deck = initialize_deck
   player_hand = []
   dealer_hand = []
+  player_total = 0
+  dealer_total = 0
+  deck = initialize_deck
+  shuffling_deck
   deal(deck, player_hand, dealer_hand)
   display_dealer_one(dealer_hand)
+
   loop do
+    player_total = calculate_total(player_hand)
     display_all("Player", player_hand)
-    display_total("Player", player_hand)
-    break if busted?(player_hand) || hit_21?(player_hand)
+    display_total("Player", player_total)
+    break if busted?(player_total) || hit_21?(player_total)
     action = request_action
     action = request_valid_action unless valid_action?(action)
     break if ['s', 'stay'].include?(action)
-    prompt "Drawing a card..."
-    sleep 1
-    player_hand << deck.pop
-    prompt "Player draws #{player_hand.last.join}."
-    sleep 1
+    draw_message
+    draw_card(player_hand, deck)
+    show_drawn("Player", player_hand)
   end
 
-  if busted?(player_hand)
-    prompt "Player busted. Dealer wins!"
-    break unless play_again?
-    next
-  elsif hit_21?(player_hand)
-    prompt "Player hit the nuts (21 points). Great job!"
-    dividing_line
-    sleep 1
-  else
-    prompt "Player chose to stay!"
-    dividing_line
-    sleep 1
-  end
+  player_result(player_total)
+  play_again? ? next : break if busted?(player_total)
 
   loop do
+    dealer_total = calculate_total(dealer_hand)
     display_all("Dealer", dealer_hand)
-    display_total("Dealer", dealer_hand)
-    break if calculate_total(dealer_hand) >= 17
-    prompt "Drawing a card..."
-    sleep 1
-    dealer_hand << deck.pop
-    prompt "Dealer draws #{dealer_hand.last.join}."
-    sleep 1
+    display_total("Dealer", dealer_total)
+    break if dealer_total >= 17
+    draw_message
+    draw_card(dealer_hand, deck)
+    show_drawn("Dealer", dealer_hand)
   end
 
-  if busted?(dealer_hand)
-    prompt "Dealer busted. Player wins!"
-  elsif calculate_total(player_hand) > calculate_total(dealer_hand)
-    prompt "Player wins #{calculate_total(player_hand)}:#{calculate_total(dealer_hand)}!"
-  elsif calculate_total(dealer_hand) > calculate_total(player_hand)
-    prompt "Dealer wins #{calculate_total(dealer_hand)}:#{calculate_total(player_hand)}!"
-  else
-    prompt "It's a tie!"
-  end
+  display_result(player_total, dealer_total)
   break unless play_again?
 end
 
