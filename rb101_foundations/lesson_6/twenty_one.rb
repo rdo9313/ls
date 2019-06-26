@@ -7,7 +7,7 @@ def prompt(msg)
 end
 
 def lined_prompt(msg)
-  puts "=> #{msg}"
+  prompt(msg)
   puts "------------------------------------------------------------------"
 end
 
@@ -22,14 +22,14 @@ def initialize_deck
 end
 
 def welcome_message
-  lined_prompt "Welcome to Twenty-One! This is a simplified version of the very
+  prompt "Welcome to Twenty-One! This is a simplified version of the very
   popular card game called Blackjack. Have fun!"
-  sleep 3
+  sleep 4
 end
 
 def shuffling_deck
   prompt "Shuffling the deck..."
-  sleep 3
+  sleep 1
 end
 
 def deal(deck, player, dealer)
@@ -39,7 +39,7 @@ def deal(deck, player, dealer)
   end
 end
 
-def display_all(player, hand)
+def display_hand(player, hand)
   cards = ""
   hand.each { |card| cards << card.join + " " }
   prompt "#{player} has #{cards.strip}."
@@ -48,11 +48,9 @@ end
 
 def display_dealer_one(hand)
   prompt "Dealer has #{hand[0].join} and an unknown card."
-  sleep 1
 end
 
-def calculate_total(hand)
-  values = hand.map { |card| card[0] }
+def add_card_values(values)
   sum = 0
   values.each do |value|
     sum += if value == "A"
@@ -63,16 +61,25 @@ def calculate_total(hand)
              value.to_i
            end
   end
+  sum
+end
 
+def optimize_ace_value(values, sum)
   values.select { |value| value == "A" }.count.times do
     sum -= 10 if sum > 21
   end
   sum
 end
 
+def calculate_total(hand)
+  values = hand.map { |card| card[0] }
+  sum = add_card_values(values)
+
+  optimize_ace_value(values, sum)
+end
+
 def display_total(player, total)
   prompt "#{player}'s hand total is #{total}."
-  sleep 1
 end
 
 def request_action
@@ -120,24 +127,23 @@ def valid_answer?(answer)
   answer == "y" || answer == "n"
 end
 
-def player_result(total)
-  if busted?(total)
-    prompt "Player busted. Dealer wins!"
-  elsif hit_21?(total)
-    lined_prompt "Player hits the nuts (21 points). Great job!"
-    sleep 1
-  else
-    lined_prompt "Player chose to stay!"
-    sleep 1
+def determine_result(player_total, dealer_total)
+  if busted?(dealer_total)
+    "dealer_bust"
+  elsif player_total > dealer_total
+    "player_win"
+  elsif dealer_total > player_total
+    "dealer_win"
   end
 end
 
-def display_result(player_total, dealer_total)
-  if busted?(dealer_total)
+def display_result(result, player_total, dealer_total)
+  case result
+  when "dealer_bust"
     prompt "Dealer busted. Player wins!"
-  elsif player_total > dealer_total
+  when "player_win"
     prompt "Player wins #{player_total}:#{dealer_total}!"
-  elsif dealer_total > player_total
+  when "dealer_win"
     prompt "Dealer wins #{dealer_total}:#{player_total}!"
   else
     prompt "It's a tie!"
@@ -155,8 +161,10 @@ def play_again?
   answer == "y"
 end
 
+system('clear')
 welcome_message
 loop do
+  system('clear')
   player_hand = []
   dealer_hand = []
   player_total = 0
@@ -168,7 +176,7 @@ loop do
 
   loop do
     player_total = calculate_total(player_hand)
-    display_all("Player", player_hand)
+    display_hand("Player", player_hand)
     display_total("Player", player_total)
     break if busted?(player_total) || hit_21?(player_total)
     action = request_action
@@ -179,14 +187,17 @@ loop do
     show_drawn("Player", player_hand)
   end
 
-  player_result(player_total)
   if busted?(player_total)
+    prompt "Player busted. Dealer wins!"
     play_again? ? next : break
+  else
+    lined_prompt "Player chose to stay!"
+    sleep 1
   end
 
   loop do
     dealer_total = calculate_total(dealer_hand)
-    display_all("Dealer", dealer_hand)
+    display_hand("Dealer", dealer_hand)
     display_total("Dealer", dealer_total)
     break if dealer_total >= 17
     draw_message
@@ -194,7 +205,8 @@ loop do
     show_drawn("Dealer", dealer_hand)
   end
 
-  display_result(player_total, dealer_total)
+  result = determine_result(player_total, dealer_total)
+  display_result(result, player_total, dealer_total)
   break unless play_again?
 end
 
