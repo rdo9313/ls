@@ -150,6 +150,35 @@ def display_result(result, player_total, dealer_total)
   end
 end
 
+def player_sequence(player_hand, hand_value, deck)
+  loop do
+    player_total = calculate_total(player_hand)
+    hand_value[:player] = player_total
+    display_hand("Player", player_hand)
+    display_total("Player", player_total)
+    break if busted?(player_total) || hit_21?(player_total)
+    action = request_action
+    action = request_valid_action unless valid_action?(action)
+    break if ['s', 'stay'].include?(action)
+    draw_message
+    draw_card(player_hand, deck)
+    show_drawn("Player", player_hand)
+  end
+end
+
+def dealer_sequence(dealer_hand, hand_value, deck)
+  loop do
+    dealer_total = calculate_total(dealer_hand)
+    hand_value[:dealer] = dealer_total
+    display_hand("Dealer", dealer_hand)
+    display_total("Dealer", dealer_total)
+    break if dealer_total >= 17
+    draw_message
+    draw_card(dealer_hand, deck)
+    show_drawn("Dealer", dealer_hand)
+  end
+end
+
 def play_again?
   answer = ""
   loop do
@@ -167,27 +196,15 @@ loop do
   system('clear')
   player_hand = []
   dealer_hand = []
-  player_total = 0
-  dealer_total = 0
+  hand_value = { player: 0, dealer: 0 }
   deck = initialize_deck
   shuffling_deck
   deal(deck, player_hand, dealer_hand)
   display_dealer_one(dealer_hand)
 
-  loop do
-    player_total = calculate_total(player_hand)
-    display_hand("Player", player_hand)
-    display_total("Player", player_total)
-    break if busted?(player_total) || hit_21?(player_total)
-    action = request_action
-    action = request_valid_action unless valid_action?(action)
-    break if ['s', 'stay'].include?(action)
-    draw_message
-    draw_card(player_hand, deck)
-    show_drawn("Player", player_hand)
-  end
+  player_sequence(player_hand, hand_value, deck)
 
-  if busted?(player_total)
+  if busted?(hand_value[:player])
     prompt "Player busted. Dealer wins!"
     play_again? ? next : break
   else
@@ -195,18 +212,10 @@ loop do
     sleep 1
   end
 
-  loop do
-    dealer_total = calculate_total(dealer_hand)
-    display_hand("Dealer", dealer_hand)
-    display_total("Dealer", dealer_total)
-    break if dealer_total >= 17
-    draw_message
-    draw_card(dealer_hand, deck)
-    show_drawn("Dealer", dealer_hand)
-  end
+  dealer_sequence(dealer_hand, hand_value, deck)
 
-  result = determine_result(player_total, dealer_total)
-  display_result(result, player_total, dealer_total)
+  result = determine_result(hand_value[:player], hand_value[:dealer])
+  display_result(result, hand_value[:player], hand_value[:dealer])
   break unless play_again?
 end
 
