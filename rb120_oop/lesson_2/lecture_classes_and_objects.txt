@@ -1,0 +1,51 @@
+1.
+class Person
+  attr_accessor :name
+  def initialize(name)
+    @name = name
+  end
+end
+
+2.
+class Person
+  attr_accessor :first_name, :last_name
+  def initialize(first)
+    @first_name = first
+    @last_name = ''
+  end
+
+  def name
+    "#{first_name} #{last_name}".strip
+  end
+end
+
+3.
+class Person
+  attr_accessor :first_name, :last_name
+  def initialize(name)
+    parse_name(name)
+  end
+
+  def name=(name)
+    parse_name(name)
+  end
+
+  def name
+    "#{first_name} #{last_name}".strip
+  end
+
+  private
+
+  def parse_name(name)
+    arr = name.split(" ")
+    self.first_name = arr.first
+    self.last_name = arr.size > 1 ? arr.last : ""
+  end
+end
+
+4.
+bob.name == rob.name
+
+5.
+The person's name is: #<Person:0x0000556503af1870>
+The person's name is: Robert Smith
