@@ -1,0 +1,180 @@
+# Banner Class
+class Banner
+  def initialize(message)
+    @message = message
+  end
+
+  def to_s
+    [horizontal_rule, empty_line, message_line, empty_line, horizontal_rule].join("\n")
+  end
+
+  private
+
+  def horizontal_rule
+    "+" + "-" * (@message.length + 2) + "+"
+  end
+
+  def empty_line
+    "|" + " " * (@message.length + 2) + "|"
+  end
+
+  def message_line
+    "| #{@message} |"
+  end
+end
+
+# What's the Output?
+"Fluffy"
+"My name is FLUFFY"
+"FLUFFY"
+"FLUFFY"
+
+class Pet
+  attr_reader :name
+
+  def initialize(name)
+    @name = name.to_s
+  end
+
+  def to_s
+    "My name is #{@name.upcase}."
+  end
+end
+
+# Fix the Program - Books (Part 1)
+class Book
+  attr_reader :author, :title
+  def initialize(author, title)
+    @author = author
+    @title = title
+  end
+
+  def to_s
+    %("#{title}", by #{author})
+  end
+end
+
+# Fix the Program - Books (Part 2)
+class Book
+  attr_accessor :title, :author
+  def to_s
+    %("#{title}", by #{author})
+  end
+end
+
+# Fix the Program - Persons
+class Person
+  def initialize(first_name, last_name)
+    @first_name = first_name.capitalize
+    @last_name = last_name.capitalize
+  end
+
+  def first_name=(first)
+    @first_name = first.capitalize
+  end
+
+  def last_name=(last)
+    @last_name = last.capitalize
+  end
+
+  def to_s
+    "#{@first_name} #{@last_name}"
+  end
+end
+
+# Fix the Program - Flight Data
+class Flight
+  def initialize(flight_number)
+    @database_handle = Database.init
+    @flight_number = flight_number
+  end
+end
+
+# Buggy Code - Car Mileage
+class Car
+  attr_accessor :mileage
+
+  def initialize
+    @mileage = 0
+  end
+
+  def increment_mileage(miles)
+    total = mileage + miles
+    @mileage = total
+  end
+
+  def print_mileage
+    puts mileage
+  end
+end
+
+# Rectangles and Squares
+class Rectangle
+  def initialize(height, width)
+    @height = height
+    @width = width
+  end
+
+  def area
+    @height * @width
+  end
+end
+
+class Square < Rectangle
+  def initialize(side)
+    super(side, side)
+  end
+end
+
+# Complete the Program - Cats!
+class Pet
+  attr_reader :name, :age, :description
+  def initialize(name, age, description)
+    @name = name
+    @age = age
+    @description = description
+  end
+
+  def to_s
+    "My cat #{self.name} is #{self.age} years old and has #{self.description} fur."
+  end
+end
+
+# Refactoring Vehicles
+class Vehicle
+  attr_reader :make, :model
+
+  def initialize(make, model)
+    @make = make
+    @model = model
+  end
+
+  def to_s
+    "#{make} #{model}"
+  end
+end
+
+class Car
+  def wheels
+    4
+  end
+end
+
+class Motorcycle
+  def wheels
+    2
+  end
+end
+
+class Truck
+  attr_reader :payload
+
+  def initialize(make, model, payload)
+    super(make, model)
+    @payload = payload
+  end
+
+  def wheels
+    6
+  end
+end
