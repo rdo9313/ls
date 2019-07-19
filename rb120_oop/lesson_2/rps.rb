@@ -49,7 +49,7 @@ class RPSGame
   end
 
   def display_welcome_message
-    puts "Welcome to Rock, Paper, Scissors!"
+    puts "Welcome to Rock, Paper, Scissors! First to 3 wins!"
   end
 
   def display_goodbye_message
@@ -63,11 +63,23 @@ class RPSGame
 
   def display_winner
     if human.move > computer.move
-      puts "#{human.name} won!"
+      puts "#{human.name} won! The score is #{human.score}:#{computer.score}!"
     elsif human.move < computer.move
-      puts "#{computer.name} won!"
+      puts "#{computer.name} won! The score is #{human.score}:#{computer.score}!"
     else
       puts "It's a tie!"
+    end
+  end
+
+  def game_over?
+    human.score > 2 || computer.score > 2
+  end
+
+  def increment_score
+    if human.move > computer.move
+      human.score += 1
+    elsif human.move < computer.move
+      computer.score += 1
     end
   end
 
@@ -85,10 +97,14 @@ class RPSGame
   def play
     display_welcome_message
     loop do
-      human.choose
-      computer.choose
-      display_moves
-      display_winner
+      loop do
+        human.choose
+        computer.choose
+        display_moves
+        increment_score
+        display_winner
+        break if game_over?
+      end
       break unless play_again?
     end
     display_goodbye_message
@@ -96,9 +112,10 @@ class RPSGame
 end
 
 class Player
-  attr_accessor :move, :name
+  attr_accessor :move, :name, :score
   def initialize
     set_name
+    @score = 0
   end
 end
 
