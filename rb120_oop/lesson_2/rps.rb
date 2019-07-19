@@ -1,12 +1,5 @@
-=begin
-l -> sp, p
-sp -> r, sc
-r -> s, l
-p -> r, sp
-sc -> p, l
-=end
 class Move
-  VALUES = ['rock', 'paper', 'scissors']
+  VALUES = ['rock', 'paper', 'scissors', 'lizard', 'spock']
 
   def initialize(value)
     @value = value
@@ -24,16 +17,28 @@ class Move
     @value == 'paper'
   end
 
+  def lizard?
+    @value == 'lizard'
+  end
+
+  def spock?
+    @value == 'spock'
+  end
+
   def >(other_move)
-    rock? && other_move.scissors? ||
-      paper? && other_move.rock? ||
-      scissors? && other_move.paper?
+    rock? && (other_move.scissors? || other_move.lizard?) ||
+      paper? && (other_move.rock? || other_move.spock?) ||
+      scissors? && (other_move.paper? || other_move.lizard?) ||
+      lizard? && (other_move.spock? || other_move.paper?) ||
+      spock? && (other_move.rock? || other_move.scissors?)
   end
 
   def <(other_move)
-    rock? && other_move.paper? ||
-      paper? && other_move.scissors? ||
-      scissors? && other_move.rock?
+    rock? && (other_move.paper? || other_move.spock?) ||
+      paper? && (other_move.scissors? || other_move.lizard?) ||
+      scissors? && (other_move.rock? || other_move.spock?) ||
+      lizard? && (other_move.rock? || other_move.scissors?) ||
+      spock? && (other_move.lizard? || other_move.paper?)
   end
 
   def to_s
@@ -134,7 +139,7 @@ class Human < Player
   def choose
     choice = nil
     loop do
-      puts "Please choose rock, paper, or scissors:"
+      puts "Please choose rock, paper, scissors, lizard, or spock:"
       choice = gets.chomp
       break if Move::VALUES.include?(choice)
       puts "Sorry, invalid choice."
