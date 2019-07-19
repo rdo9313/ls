@@ -1,3 +1,10 @@
+=begin
+l -> sp, p
+sp -> r, sc
+r -> s, l
+p -> r, sp
+sc -> p, l
+=end
 class Move
   VALUES = ['rock', 'paper', 'scissors']
 
