@@ -62,11 +62,19 @@ end
 
 VALUES = { 'rock' => Rock, 'paper' => Paper, 'scissors' => Scissors,
   'lizard' => Lizard, 'spock' => Spock }
+
 class RPSGame
-  attr_accessor :human, :computer
+  attr_accessor :human, :computer, :history
   def initialize
     @human = Human.new
     @computer = Computer.new
+    @history = []
+  end
+
+  def display_history
+    history.each_with_index do |result, idx|
+      puts "#{idx + 1}. #{result}"
+    end
   end
 
   def display_welcome_message
@@ -78,22 +86,22 @@ class RPSGame
   end
 
   def display_moves
-    puts "#{human.name} chose #{human.move.name}"
-    puts "#{computer.name} chose #{computer.move.name}"
+    "#{human.name} chose #{human.move.name}, #{computer.name} \
+    chose #{computer.move.name}.".squeeze(' ')
   end
 
   def display_winner
     if human.move > computer.move
-      puts "#{human.name} won! The score is #{human.score}:#{computer.score}!"
+      puts "#{human.name} wins! The score is #{human.score}:#{computer.score}."
     elsif computer.move > human.move
-      puts "#{computer.name} won! The score is #{human.score}:#{computer.score}!"
+      puts "#{computer.name} wins! The score is #{human.score}:#{computer.score}."
     else
       puts "It's a tie!"
     end
   end
 
   def game_over?
-    human.score > 4 || computer.score > 4
+    human.score > 2 || computer.score > 2
   end
 
   def increment_score
@@ -104,10 +112,25 @@ class RPSGame
     end
   end
 
+  def save_history
+    history << display_moves
+  end
+
+  def match_history?
+    answer = nil
+    loop do
+      puts "View match history? (y/n)"
+      answer = gets.chomp
+      break if ['y', 'n'].include?(answer.downcase)
+      puts "Sorry, must be y or n."
+    end
+    answer.downcase == "y"
+  end
+
   def play_again?
     answer = nil
     loop do
-      puts "Would you like to play again? (y/n)"
+      puts "Play again? (y/n)"
       answer = gets.chomp
       break if ['y', 'n'].include?(answer.downcase)
       puts "Sorry, must be y or n."
@@ -118,21 +141,32 @@ class RPSGame
   def play
     display_welcome_message
     loop do
-      human.choose
-      computer.choose
-      display_moves
-      increment_score
-      display_winner
-      break if game_over?
+      human.clear_score
+      computer.clear_score
+      loop do
+        human.choose
+        computer.choose
+        puts display_moves
+        increment_score
+        display_winner
+        save_history
+        break if game_over?
+      end
+      display_history if match_history?
+      break unless play_again?
     end
     display_goodbye_message
   end
 end
 
 class Player
-  attr_accessor :move, :name, :score
+  attr_accessor :move, :name, :score, :history
   def initialize
     set_name
+    @score = 0
+  end
+
+  def clear_score
     @score = 0
   end
 end
