@@ -1,51 +1,67 @@
-class Move
-  VALUES = ['rock', 'paper', 'scissors', 'lizard', 'spock']
+require 'pry'
 
-  def initialize(value)
-    @value = value
-  end
+class Rock
+  attr_reader :name
 
-  def scissors?
-    @value == 'scissors'
-  end
-
-  def rock?
-    @value == 'rock'
-  end
-
-  def paper?
-    @value == 'paper'
-  end
-
-  def lizard?
-    @value == 'lizard'
-  end
-
-  def spock?
-    @value == 'spock'
+  def initialize
+    @name = "rock"
   end
 
   def >(other_move)
-    rock? && (other_move.scissors? || other_move.lizard?) ||
-      paper? && (other_move.rock? || other_move.spock?) ||
-      scissors? && (other_move.paper? || other_move.lizard?) ||
-      lizard? && (other_move.spock? || other_move.paper?) ||
-      spock? && (other_move.rock? || other_move.scissors?)
-  end
-
-  def <(other_move)
-    rock? && (other_move.paper? || other_move.spock?) ||
-      paper? && (other_move.scissors? || other_move.lizard?) ||
-      scissors? && (other_move.rock? || other_move.spock?) ||
-      lizard? && (other_move.rock? || other_move.scissors?) ||
-      spock? && (other_move.lizard? || other_move.paper?)
-  end
-
-  def to_s
-    @value
+    other_move.name == "scissors" || other_move.name == "lizard"
   end
 end
 
+class Paper
+  attr_reader :name
+
+  def initialize
+    @name = "paper"
+  end
+
+  def >(other_move)
+    other_move.name == "rock" || other_move.name == "spock"
+  end
+end
+
+class Scissors
+  attr_reader :name
+
+  def initialize
+    @name = "scissors"
+  end
+
+  def >(other_move)
+    other_move.name == "paper" || other_move.name == "lizard"
+  end
+end
+
+class Spock
+  attr_reader :name
+
+  def initialize
+    @name = "spock"
+  end
+
+  def >(other_move)
+    other_move.name == "scissors" || other_move.name == "rock"
+  end
+end
+
+class Lizard
+  attr_reader :name
+
+  def initialize
+    @name = "lizard"
+  end
+
+  def >(other_move)
+    other_move.name == "spock" || other_move.name == "paper"
+  end
+end
+
+VALUES = { 'rock' => Rock, 'paper' => Paper, 'scissors' => Scissors,
+  'lizard' => Lizard, 'spock' => Spock }
 class RPSGame
   attr_accessor :human, :computer
   def initialize
@@ -54,7 +70,7 @@ class RPSGame
   end
 
   def display_welcome_message
-    puts "Welcome to Rock, Paper, Scissors! First to 3 wins!"
+    puts "Welcome to Rock, Paper, Scissors! First to 5 wins!"
   end
 
   def display_goodbye_message
@@ -62,14 +78,14 @@ class RPSGame
   end
 
   def display_moves
-    puts "#{human.name} chose #{human.move}"
-    puts "#{computer.name} chose #{computer.move}"
+    puts "#{human.name} chose #{human.move.name}"
+    puts "#{computer.name} chose #{computer.move.name}"
   end
 
   def display_winner
     if human.move > computer.move
       puts "#{human.name} won! The score is #{human.score}:#{computer.score}!"
-    elsif human.move < computer.move
+    elsif computer.move > human.move
       puts "#{computer.name} won! The score is #{human.score}:#{computer.score}!"
     else
       puts "It's a tie!"
@@ -77,13 +93,13 @@ class RPSGame
   end
 
   def game_over?
-    human.score > 2 || computer.score > 2
+    human.score > 4 || computer.score > 4
   end
 
   def increment_score
     if human.move > computer.move
       human.score += 1
-    elsif human.move < computer.move
+    elsif computer.move > human.move
       computer.score += 1
     end
   end
@@ -102,15 +118,12 @@ class RPSGame
   def play
     display_welcome_message
     loop do
-      loop do
-        human.choose
-        computer.choose
-        display_moves
-        increment_score
-        display_winner
-        break if game_over?
-      end
-      break unless play_again?
+      human.choose
+      computer.choose
+      display_moves
+      increment_score
+      display_winner
+      break if game_over?
     end
     display_goodbye_message
   end
@@ -141,10 +154,10 @@ class Human < Player
     loop do
       puts "Please choose rock, paper, scissors, lizard, or spock:"
       choice = gets.chomp
-      break if Move::VALUES.include?(choice)
+      break if VALUES.keys.include?(choice)
       puts "Sorry, invalid choice."
     end
-    self.move = Move.new(choice)
+    self.move = VALUES[choice].new
   end
 end
 
@@ -154,7 +167,7 @@ class Computer < Player
   end
 
   def choose
-    self.move = Move.new(Move::VALUES.sample)
+    self.move = VALUES[VALUES.keys.sample].new
   end
 end
 
