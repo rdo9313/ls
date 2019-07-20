@@ -60,9 +60,6 @@ class Lizard
   end
 end
 
-VALUES = { 'rock' => Rock, 'paper' => Paper, 'scissors' => Scissors,
-  'lizard' => Lizard, 'spock' => Spock }
-
 class RPSGame
   attr_accessor :human, :computer, :history
   def initialize
@@ -127,6 +124,14 @@ class RPSGame
     answer.downcase == "y"
   end
 
+  def update_probability
+    if human.move > computer.move
+      computer.probability[computer.move.name] -= 1
+    elsif computer.move > human.move
+      computer.probability[computer.move.name] += 1
+    end
+  end
+
   def play_again?
     answer = nil
     loop do
@@ -150,6 +155,7 @@ class RPSGame
         increment_score
         display_winner
         save_history
+        update_probability
         break if game_over?
       end
       display_history if match_history?
@@ -161,6 +167,8 @@ end
 
 class Player
   attr_accessor :move, :name, :score, :history
+  VALUES = { 'rock' => Rock, 'paper' => Paper, 'scissors' => Scissors,
+    'lizard' => Lizard, 'spock' => Spock }
   def initialize
     set_name
     @score = 0
@@ -196,12 +204,27 @@ class Human < Player
 end
 
 class Computer < Player
+  attr_reader :probability
+  def initialize
+    super
+    @probability = {'rock' => 10, 'paper' => 10, 'scissors' => 10,
+    'lizard' => 10, 'spock' => 10}
+  end
+
+  def choices
+    array = []
+    @probability.each do |k,v|
+      v.times { array << k }
+    end
+    array
+  end
+
   def set_name
-    self.name = ['R2D2', 'Hal', 'Sonny', 'Number 5'].sample
+    self.name = 'DeepMind'
   end
 
   def choose
-    self.move = VALUES[VALUES.keys.sample].new
+    self.move = VALUES[self.choices.sample].new
   end
 end
 
