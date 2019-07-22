@@ -1,3 +1,9 @@
+# Features added:
+# 1) Keeping Score
+# 2) Lizard and Spock
+# 3) Add a class for each move
+# 4) Track history of moves
+# 5) adjust computer choice based on history
 class Rock
   attr_reader :name
 
