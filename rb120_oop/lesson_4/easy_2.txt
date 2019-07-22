@@ -1,0 +1,38 @@
+Question 1
+"You will" + random element of the array
+
+Question 2
+"You will" + random element of Roadtrip array
+
+Question 3
+You can run #ancestors method on an object.
+The lookup chain for Orange is Orange -> Taste
+The lookup chain for HotSauce is HotSauce -> Taste
+
+Question 4
+You can remove the type and type= methods and add attr_accessor :type
+
+Question 5
+excited_dog is a local variable
+@excited_dog is an instance variable
+@@excited_dog is a class variable
+
+Question 6
+self.manufacturer is a class method because it prefixes with self.
+
+Question 7
+@@cats_count class variable is initialized at 0 and is available to all methods
+within the class scope. It is incremented by 1 everytime a new instance is
+created from the class Cat.
+
+Question 8
+Bingo < Game. Use inheritance.
+
+Question 9
+If we added a play method to the Bingo class, it would override the play
+method of the Game class whenever #play is invoked on a Bingo instance object.
+
+Question 10
+OOP allows you to think more abstractly about the code, represent nouns with
+objects, manage complexity using things like namespacing, give functionality
+to different parts of an application more easily.
