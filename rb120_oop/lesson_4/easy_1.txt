@@ -1,0 +1,31 @@
+Question 1
+All are objects in Ruby. You can run #class method to find out class.
+
+Question 2
+You can use the #include method and add 'include Speed' to the classes Car and Truck.
+
+Question 3
+This is done through polymorphism. Self refers to whatever object is calling
+the go_fast method, in this case 'small_car', and the class of this object
+is 'Car'.
+
+Question 4
+angry_cat = AngryCat.new
+
+Question 5
+Pizza has an instance variable, defined by the @ symbol.
+
+Question 6
+attr_reader :volume
+
+Question 7
+The object's class and id.
+
+Question 8
+Self refers to an instance of the class Cat.
+
+Question 9
+Self refers to the Cat class itself.
+
+Question 10
+Bag.new('red', 'cotton')
