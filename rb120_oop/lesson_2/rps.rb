@@ -135,9 +135,19 @@ class RPSGame
   end
 
   def save_history
-    history << "#{human.name} chose #{human.move.name}, #{computer.name} \
-    chose #{computer.move.name}.".squeeze(' ')
-    sleep(2)
+    human_name = human.name
+    computer_name = computer.name
+    human_move = human.move.name
+    computer_move = computer.move.name
+    if game_over?
+      history << "#{human_name} chose #{human_move}, #{computer_name} \
+      chose #{computer_move}.
+      --------------------------------------------------------------------"
+                 .squeeze(' ')
+    else
+      history << "#{human_name} chose #{human_move}, #{computer_name} \
+      chose #{computer_move}.".squeeze(' ')
+    end
   end
 
   def match_history?
@@ -185,6 +195,7 @@ class RPSGame
   end
 
   def update_state
+    continue
     save_history
     update_probability
   end
@@ -210,9 +221,9 @@ end
 
 class Player
   attr_accessor :move, :name, :score, :history
-  VALUES = { ['r', 'rock'] => Rock, ['p', 'paper'] => Paper,
-             ['s', 'scissors'] => Scissors, ['l', 'lizard'] => Lizard,
-             ['sp', 'spock'] => Spock }
+  CHOICES = { 'rock' => Rock, 'paper' => Paper, 'scissors' => Scissors,
+              'lizard' => Lizard, 'spock' => Spock }
+
   def initialize
     set_name
     @score = 0
@@ -235,17 +246,29 @@ class Human < Player
     self.name = n
   end
 
+  def convert(choice)
+    case choice
+    when 'r' then 'rock'
+    when 'p' then 'paper'
+    when 's' then 'scissors'
+    when 'sp' then 'spock'
+    when 'l' then 'lizard'
+    else
+      choice
+    end
+  end
+
   def choose
     choice = nil
     loop do
       system("clear")
       puts "Please choose (r)ock, (p)aper, (s)cissors, (l)izard, or (sp)ock:"
-      choice = gets.chomp
-      break if VALUES.keys.flatten.include?(choice.downcase)
+      choice = convert(gets.chomp.downcase)
+      break if CHOICES.keys.include?(choice)
       puts "Sorry, invalid choice."
       sleep(1)
     end
-    VALUES.each { |k, v| self.move = v.new if k.include?(choice.downcase) }
+    self.move = CHOICES[choice].new
   end
 end
 
@@ -259,8 +282,8 @@ class Computer < Player
 
   def choices
     array = []
-    @probability.each do |k, v|
-      v.times { array << k }
+    @probability.each do |choice, frequency|
+      frequency.times { array << choice }
     end
     array
   end
@@ -270,7 +293,7 @@ class Computer < Player
   end
 
   def choose
-    VALUES.each { |k, v| self.move = v.new if k.include?(choices.sample) }
+    self.move = CHOICES[choices.sample].new
   end
 end
 
