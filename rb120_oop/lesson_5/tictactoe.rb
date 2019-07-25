@@ -85,10 +85,22 @@ class Square
 end
 
 class Player
+  attr_accessor :score
   attr_reader :marker
 
   def initialize(marker)
     @marker = marker
+    @score = 0
+  end
+end
+
+class Computer
+  attr_accessor :score
+  attr_reader :marker
+
+  def initialize(marker)
+    @marker = marker
+    @score = 0
   end
 end
 
@@ -96,15 +108,13 @@ class TTTGame
   HUMAN_MARKER = "X"
   COMPUTER_MARKER = "O"
   FIRST_TO_MOVE = HUMAN_MARKER
-  attr_reader :board, :human, :computer, :human_score, :comp_score
+  attr_reader :board, :human, :computer
 
   def initialize
     @board = Board.new
     @human = Player.new(HUMAN_MARKER)
-    @computer = Player.new(COMPUTER_MARKER)
+    @computer = Computer.new(COMPUTER_MARKER)
     @current_marker = FIRST_TO_MOVE
-    @human_score = 0
-    @comp_score = 0
   end
 
   def play
@@ -121,11 +131,11 @@ class TTTGame
         end
         update_score
         display_result
-        break if human_score > 2 || comp_score > 2
-        reset
+        break if human.score > 2 || computer.score > 2
+        reset_board
       end
       break unless play_again?
-      reset
+      reset_board_and_score
       display_play_again_message
     end
     display_goodbye_message
@@ -209,20 +219,20 @@ class TTTGame
     display_board
     case board.winning_marker
     when human.marker
-      puts "You won! The score is #{human_score}:#{comp_score}."
+      puts "You won! The score is #{human.score}:#{computer.score}."
     when computer.marker
-      puts "Computer won! The score is #{human_score}:#{comp_score}."
+      puts "Computer won! The score is #{human.score}:#{computer.score}."
     else
-      puts "It's a tie! The score is #{human_score}:#{comp_score}."
+      puts "It's a tie! The score is #{human.score}:#{computer.score}."
     end
     continue
   end
 
   def update_score
     if board.winning_marker == HUMAN_MARKER
-      @human_score += 1
+      human.score += 1
     elsif board.winning_marker == COMPUTER_MARKER
-      @comp_score += 1
+      computer.score += 1
     end
   end
 
@@ -238,7 +248,15 @@ class TTTGame
     answer == "y"
   end
 
-  def reset
+  def reset_board
+    board.reset
+    @current_marker = FIRST_TO_MOVE
+    clear
+  end
+
+  def reset_board_and_score
+    human.score = 0
+    computer.score = 0
     board.reset
     @current_marker = FIRST_TO_MOVE
     clear
