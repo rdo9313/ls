@@ -1,5 +1,6 @@
 require 'pry'
 class Board
+  attr_reader :squares
   WINNING_LINES = [[1, 2, 3], [4, 5, 6], [7, 8, 9]] +
                   [[1, 4, 7], [2, 5, 8], [3, 6, 9]] +
                   [[1, 5, 9], [3, 5, 7]]
@@ -26,6 +27,10 @@ class Board
 
   def []=(key, marker)
     @squares[key].marker = marker
+  end
+
+  def [](key)
+    @squares.values_at(key).first.marker
   end
 
   def unmarked_keys
@@ -157,7 +162,7 @@ class TTTGame
   end
 
   def display_board
-    puts "You're a #{human.marker}. Computer is a #{computer.marker}."
+    puts "You're a #{HUMAN_MARKER}. Computer is a #{COMPUTER_MARKER}."
     puts ""
     board.draw
     puts ""
@@ -202,11 +207,48 @@ class TTTGame
       puts "Sorry, that's not a valid choice."
     end
 
-    board[square] = human.marker
+    board[square] = HUMAN_MARKER
   end
 
+  def find_winning_square
+    square = nil
+    Board::WINNING_LINES.each do |line|
+      if board.squares.values_at(*line).collect(&:marker).count(COMPUTER_MARKER) == 2
+        square = board.squares.select do |position, obj|
+          line.include?(position) && obj.marker == ' '
+        end.keys.first
+      end
+      break if square
+    end
+    square
+  end
+
+  def find_defending_square
+    square = nil
+    Board::WINNING_LINES.each do |line|
+      if board.squares.values_at(*line).collect(&:marker).count(HUMAN_MARKER) == 2
+        square = board.squares.select do |position, obj|
+          line.include?(position) && obj.marker == ' '
+        end.keys.first
+      end
+      break if square
+    end
+    square
+  end
+
+
   def computer_moves
-    board[board.unmarked_keys.sample] = computer.marker
+    square = nil
+    square = find_winning_square
+    square = find_defending_square if !square
+
+    if board[5] == " " && !square
+      square = 5
+    elsif !square
+      square = board.unmarked_keys.sample
+    end
+
+    board[square] = COMPUTER_MARKER
   end
 
   def continue
@@ -218,9 +260,9 @@ class TTTGame
     clear
     display_board
     case board.winning_marker
-    when human.marker
+    when HUMAN_MARKER
       puts "You won! The score is #{human.score}:#{computer.score}."
-    when computer.marker
+    when COMPUTER_MARKER
       puts "Computer won! The score is #{human.score}:#{computer.score}."
     else
       puts "It's a tie! The score is #{human.score}:#{computer.score}."
