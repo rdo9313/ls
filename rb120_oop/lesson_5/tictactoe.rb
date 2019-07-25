@@ -1,5 +1,6 @@
 require 'pry'
 class Board
+  attr_reader :squares
   WINNING_LINES = [[1, 2, 3], [4, 5, 6], [7, 8, 9]] +
                   [[1, 4, 7], [2, 5, 8], [3, 6, 9]] +
                   [[1, 5, 9], [3, 5, 7]]
@@ -26,6 +27,10 @@ class Board
 
   def []=(key, marker)
     @squares[key].marker = marker
+  end
+
+  def [](key)
+    @squares.values_at(key).first.marker
   end
 
   def unmarked_keys
@@ -85,10 +90,22 @@ class Square
 end
 
 class Player
+  attr_accessor :score
   attr_reader :marker
 
   def initialize(marker)
     @marker = marker
+    @score = 0
+  end
+end
+
+class Computer
+  attr_accessor :score
+  attr_reader :marker
+
+  def initialize(marker)
+    @marker = marker
+    @score = 0
   end
 end
 
@@ -96,15 +113,13 @@ class TTTGame
   HUMAN_MARKER = "X"
   COMPUTER_MARKER = "O"
   FIRST_TO_MOVE = HUMAN_MARKER
-  attr_reader :board, :human, :computer, :human_score, :comp_score
+  attr_reader :board, :human, :computer
 
   def initialize
     @board = Board.new
     @human = Player.new(HUMAN_MARKER)
-    @computer = Player.new(COMPUTER_MARKER)
+    @computer = Computer.new(COMPUTER_MARKER)
     @current_marker = FIRST_TO_MOVE
-    @human_score = 0
-    @comp_score = 0
   end
 
   def play
@@ -121,11 +136,11 @@ class TTTGame
         end
         update_score
         display_result
-        break if human_score > 2 || comp_score > 2
-        reset
+        break if human.score > 2 || computer.score > 2
+        reset_board
       end
       break unless play_again?
-      reset
+      reset_board_and_score
       display_play_again_message
     end
     display_goodbye_message
@@ -147,7 +162,7 @@ class TTTGame
   end
 
   def display_board
-    puts "You're a #{human.marker}. Computer is a #{computer.marker}."
+    puts "You're a #{HUMAN_MARKER}. Computer is a #{COMPUTER_MARKER}."
     puts ""
     board.draw
     puts ""
@@ -192,11 +207,48 @@ class TTTGame
       puts "Sorry, that's not a valid choice."
     end
 
-    board[square] = human.marker
+    board[square] = HUMAN_MARKER
   end
 
+  def find_winning_square
+    square = nil
+    Board::WINNING_LINES.each do |line|
+      if board.squares.values_at(*line).collect(&:marker).count(COMPUTER_MARKER) == 2
+        square = board.squares.select do |position, obj|
+          line.include?(position) && obj.marker == ' '
+        end.keys.first
+      end
+      break if square
+    end
+    square
+  end
+
+  def find_defending_square
+    square = nil
+    Board::WINNING_LINES.each do |line|
+      if board.squares.values_at(*line).collect(&:marker).count(HUMAN_MARKER) == 2
+        square = board.squares.select do |position, obj|
+          line.include?(position) && obj.marker == ' '
+        end.keys.first
+      end
+      break if square
+    end
+    square
+  end
+
+
   def computer_moves
-    board[board.unmarked_keys.sample] = computer.marker
+    square = nil
+    square = find_winning_square
+    square = find_defending_square if !square
+
+    if board[5] == " " && !square
+      square = 5
+    elsif !square
+      square = board.unmarked_keys.sample
+    end
+
+    board[square] = COMPUTER_MARKER
   end
 
   def continue
@@ -208,21 +260,21 @@ class TTTGame
     clear
     display_board
     case board.winning_marker
-    when human.marker
-      puts "You won! The score is #{human_score}:#{comp_score}."
-    when computer.marker
-      puts "Computer won! The score is #{human_score}:#{comp_score}."
+    when HUMAN_MARKER
+      puts "You won! The score is #{human.score}:#{computer.score}."
+    when COMPUTER_MARKER
+      puts "Computer won! The score is #{human.score}:#{computer.score}."
     else
-      puts "It's a tie! The score is #{human_score}:#{comp_score}."
+      puts "It's a tie! The score is #{human.score}:#{computer.score}."
     end
     continue
   end
 
   def update_score
     if board.winning_marker == HUMAN_MARKER
-      @human_score += 1
+      human.score += 1
     elsif board.winning_marker == COMPUTER_MARKER
-      @comp_score += 1
+      computer.score += 1
     end
   end
 
@@ -238,7 +290,15 @@ class TTTGame
     answer == "y"
   end
 
-  def reset
+  def reset_board
+    board.reset
+    @current_marker = FIRST_TO_MOVE
+    clear
+  end
+
+  def reset_board_and_score
+    human.score = 0
+    computer.score = 0
     board.reset
     @current_marker = FIRST_TO_MOVE
     clear
