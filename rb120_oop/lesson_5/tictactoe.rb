@@ -119,9 +119,9 @@ class TTTGame
   def play
     clear
     display_welcome_message
-    set_player_marker!
-    set_current_player!
     loop do
+      set_player_marker!
+      set_current_player!
       loop do
         display_board
         loop do
@@ -172,19 +172,19 @@ class TTTGame
   def set_current_player!
     if first_to_move == "choose"
       choice = retrieve_player_choice
-      request_valid_answer(choice) if !valid_answer?(choice)
+      choice = request_valid_answer(choice) if !valid_answer?(choice)
       determine_first_player(choice)
-    elsif !%w(O X).include?(first_to_move)
+    elsif !%w(player computer).include?(first_to_move)
       puts "First player choice preset is invalid."
       choice = retrieve_player_choice
-      request_valid_answer(choice) if !valid_answer?(choice)
+      choice = request_valid_answer(choice) if !valid_answer?(choice)
       determine_first_player(choice)
     end
   end
 
   def determine_first_player(choice)
-    self.first_to_move = choice == 'y' ? human.marker : computer.marker
-    self.current_marker = first_to_move
+    first = choice == 'y' ? 'player' : 'computer'
+    self.current_marker = first == 'player' ? human.marker : computer.marker
   end
 
   def request_valid_answer(choice)
@@ -353,7 +353,6 @@ class TTTGame
 
   def reset_board
     board.reset
-    @current_marker = first_to_move
     clear
   end
 
@@ -361,7 +360,6 @@ class TTTGame
     human.score = 0
     computer.score = 0
     board.reset
-    @current_marker = first_to_move
     clear
   end
 
