@@ -1,4 +1,3 @@
-require 'pry'
 class Board
   attr_reader :squares
   WINNING_LINES = [[1, 2, 3], [4, 5, 6], [7, 8, 9]] +
@@ -297,8 +296,9 @@ class TTTGame
     puts "Choose a position to place piece: #{joinor(board.unmarked_keys)} "
     square = nil
     loop do
-      square = gets.chomp.to_i
-      break if board.unmarked_keys.include?(square)
+      response = gets.chomp
+      square = response.to_i
+      break if board.unmarked_keys.include?(square) && response.size == 1
       puts "Sorry, that's not a valid choice."
     end
 
