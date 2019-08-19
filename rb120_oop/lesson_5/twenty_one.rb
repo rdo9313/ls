@@ -39,7 +39,19 @@ class Participant
 end
 
 class Deck
+  attr_accessor :cards
   def initialize
+    @cards = []
+    Card::SUITS.each do |suit|
+      Card::VALUES.each do |value|
+        @cards << Card.new(suit, value)
+      end
+    end
+    randomize!
+  end
+
+  def randomize!
+    cards.shuffle!
   end
 end
 
