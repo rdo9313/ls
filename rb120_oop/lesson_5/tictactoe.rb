@@ -112,24 +112,64 @@ class Player
 end
 
 class Computer
-  attr_accessor :score, :marker
-  attr_reader :name
+  attr_accessor :score, :marker, :board
+  attr_reader :name, :human
 
-  def initialize
+  def initialize(board, human)
+    @board = board
+    @human = human
     @score = 0
     @name = 'DeepMind'
+  end
+
+  def find_winning_square
+    square = nil
+    Board::WINNING_LINES.each do |line|
+      board_values = board.squares.values_at(*line)
+      if board_values.collect(&:marker).count(marker) == 2
+        square = board.squares.select do |position, obj|
+          line.include?(position) && obj.marker == ' '
+        end.keys.first
+      end
+      break if square
+    end
+    square
+  end
+
+  def find_defending_square
+    square = nil
+    Board::WINNING_LINES.each do |line|
+      board_values = board.squares.values_at(*line)
+      if board_values.collect(&:marker).count(human.marker) == 2
+        square = board.squares.select do |position, obj|
+          line.include?(position) && obj.marker == ' '
+        end.keys.first
+      end
+      break if square
+    end
+    square
+  end
+
+  def move
+    square = find_winning_square
+    square = find_defending_square if !square
+
+    if board[5] == " " && !square
+      square = 5
+    elsif !square
+      square = board.unmarked_keys.sample
+    end
+
+    board[square] = marker
   end
 end
 
 class TTTGame
-  attr_reader :board, :human, :computer
-  attr_accessor :current_marker, :first_to_move, :current_marker
-
   def initialize
     @board = Board.new
     @first_to_move = 'player'
     @human = Player.new
-    @computer = Computer.new
+    @computer = Computer.new(@board, @human)
   end
 
   def play
@@ -146,6 +186,8 @@ class TTTGame
   end
 
   private
+  attr_reader :board, :human, :computer
+  attr_accessor :current_marker, :first_to_move
 
   def complete_match
     loop do
@@ -241,6 +283,7 @@ class TTTGame
   def display_welcome_message
     clear
     puts "Welcome to Tic Tac Toe!"
+    puts "The first to 3 wins will be the winner."
     puts ""
   end
 
@@ -271,7 +314,7 @@ class TTTGame
       human_moves
       @current_marker = computer.marker
     else
-      computer_moves
+      computer.move
       @current_marker = human.marker
     end
     clear_screen_and_display_board
@@ -305,49 +348,8 @@ class TTTGame
     board[square] = human.marker
   end
 
-  def find_winning_square
-    square = nil
-    Board::WINNING_LINES.each do |line|
-      board_values = board.squares.values_at(*line)
-      if board_values.collect(&:marker).count(computer.marker) == 2
-        square = board.squares.select do |position, obj|
-          line.include?(position) && obj.marker == ' '
-        end.keys.first
-      end
-      break if square
-    end
-    square
-  end
-
-  def find_defending_square
-    square = nil
-    Board::WINNING_LINES.each do |line|
-      board_values = board.squares.values_at(*line)
-      if board_values.collect(&:marker).count(human.marker) == 2
-        square = board.squares.select do |position, obj|
-          line.include?(position) && obj.marker == ' '
-        end.keys.first
-      end
-      break if square
-    end
-    square
-  end
-
-  def computer_moves
-    square = find_winning_square
-    square = find_defending_square if !square
-
-    if board[5] == " " && !square
-      square = 5
-    elsif !square
-      square = board.unmarked_keys.sample
-    end
-
-    board[square] = computer.marker
-  end
-
   def continue
-    puts "Enter any key to continue:"
+    puts "Press enter to continue:"
     gets
   end
 

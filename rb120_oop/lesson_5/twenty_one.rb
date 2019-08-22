@@ -1,4 +1,4 @@
-class Player
+class Player < Participant
   def initialize
   end
 
@@ -15,7 +15,7 @@ class Player
   end
 end
 
-class Dealer
+class Dealer < Participant
   def initialize
   end
 
@@ -36,6 +36,12 @@ class Dealer
 end
 
 class Participant
+  attr_accessor :name, :cards
+
+  def initialize
+    @cards = []
+    set_name
+  end
 end
 
 class Deck
