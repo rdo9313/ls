@@ -1,46 +1,36 @@
-class Player < Participant
-  def initialize
-  end
-
-  def hit
-  end
-
-  def stay
-  end
-
-  def busted?
-  end
-
-  def total
-  end
-end
-
-class Dealer < Participant
-  def initialize
-  end
-
-  def deal
-  end
-
-  def hit
-  end
-
-  def stay
-  end
-
-  def busted?
-  end
-
-  def total
+require 'byebug'
+module Hand
+  def add_card(card)
+    cards << card
   end
 end
 
 class Participant
+  include Hand
   attr_accessor :name, :cards
 
   def initialize
     @cards = []
     set_name
+  end
+end
+
+class Player < Participant
+  def set_name
+    name = ''
+    loop do
+      puts "What's your name?"
+      name = gets.chomp
+      break unless name.empty?
+      puts "Sorry, must enter a value."
+    end
+    self.name = name
+  end
+end
+
+class Dealer < Participant
+  def set_name
+    self.name = 'DeepMind'
   end
 end
 
@@ -59,6 +49,10 @@ class Deck
   def randomize!
     cards.shuffle!
   end
+
+  def deal_one
+    cards.pop
+  end
 end
 
 class Card
@@ -71,12 +65,27 @@ class Card
 end
 
 class Game
+  attr_accessor :deck, :dealer, :player
+
+  def initialize
+    @deck = Deck.new
+    @dealer = Dealer.new
+    @player = Player.new
+  end
+
   def start
     deal_cards
     show_initial_cards
     player_turn
     dealer_turn
     show_result
+  end
+
+  def deal_cards
+    2.times do
+      dealer.add_card(deck.deal_one)
+      player.add_card(deck.deal_one)
+    end
   end
 end
 
