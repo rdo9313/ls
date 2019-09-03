@@ -65,8 +65,8 @@ class Player < Participant
     loop do
       puts "What's your name?"
       name = gets.chomp
-      break unless name.empty?
-      puts "Sorry, must enter a value."
+      break unless name.size < 3
+      puts "Sorry, name must be at least three characters."
     end
     self.name = name
   end
@@ -168,13 +168,21 @@ class Game
     @player = Player.new
   end
 
+  def continue
+    puts "Press enter to continue:"
+    gets
+  end
+
+  def greeting
+    system 'clear'
+    puts "Welcome to Twenty-One! This is a simplified version of the very
+    popular card game called Blackjack. Have fun!"
+    puts ''
+    continue
+  end
+
   def player_turn
     loop do
-      if player.total == 21
-        puts "Twenty-One! #{player.name} wins!"
-        break
-      end
-
       puts "Would you like to (h)it or (s)tay?"
       answer = nil
       loop do
@@ -182,14 +190,19 @@ class Game
         break if ['h', 'hit', 's', 'stay'].include?(answer)
         puts "Sorry, not a valid response."
       end
+      system 'clear'
       if answer == "s" || answer == "stay"
         puts "#{player.name} stays!"
+        continue
+        system 'clear'
         break
       elsif player.busted?
         break
       else
         puts "#{player.name} hits!"
+        continue
         player.add_card(deck.deal_one)
+        system 'clear'
         player.show_hand
         break if player.busted?
       end
@@ -199,8 +212,10 @@ class Game
   def dealer_turn
     loop do
       dealer.show_hand
+      sleep 1
       break if dealer.total > 16
       puts "#{dealer.name} draws a card."
+      sleep 1
       dealer.add_card(deck.deal_one)
     end
   end
@@ -231,11 +246,13 @@ class Game
   end
 
   def show_hands
+    system 'clear'
     player.show_hand
     dealer.show_hand
   end
 
   def start
+    greeting
     loop do
       system 'clear'
       deal_cards
@@ -253,6 +270,8 @@ class Game
       end
 
       dealer_turn
+      continue
+      system 'clear'
       if dealer.busted?
         show_busted
         if play_again?
@@ -270,20 +289,28 @@ class Game
   end
 
   def deal_cards
+    system 'clear'
+    puts "Shuffling and dealing cards..."
     2.times do
       dealer.add_card(deck.deal_one)
       player.add_card(deck.deal_one)
     end
+    sleep 3
   end
 
   def show_flop
+    system 'clear'
     player.show_flop
+    sleep 1
     dealer.show_flop
   end
 
   def show_hands
+    system 'clear'
     player.show_hand
+    sleep 1
     dealer.show_hand
+    sleep 1
   end
 
   def determine_result
