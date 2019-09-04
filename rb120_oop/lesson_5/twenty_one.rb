@@ -1,4 +1,5 @@
 module Hand
+  MAX_VALUE = 21
   def show_hand
     puts "#{name}'s Hand:"
     cards.each do |card|
@@ -21,7 +22,7 @@ module Hand
     end
 
     cards.select(&:ace?).count.times do
-      break if total <= 21
+      break if total <= MAX_VALUE
       total -= 10
     end
     total
@@ -32,47 +33,52 @@ module Hand
   end
 
   def busted?
-    total > 21
+    total > MAX_VALUE
   end
 end
 
 class Participant
   include Hand
-  attr_accessor :name, :cards
+  attr_accessor :name, :cards, :score
 
   def initialize
     @cards = []
+    @score = 0
     set_name
   end
 end
 
 class Player < Participant
+  def show_flop
+    show_hand
+  end
+
+  private
+
   def set_name
     name = ''
     loop do
       puts "What's your name?"
-      name = gets.chomp
+      name = gets.chomp.strip
       break unless name.size < 3
       puts "Sorry, name must be at least three characters."
     end
     self.name = name
   end
-
-  def show_flop
-    show_hand
-  end
 end
 
 class Dealer < Participant
-  def set_name
-    self.name = 'DeepMind'
-  end
-
   def show_flop
     puts "#{name}'s Hand:"
     puts "=> #{cards.first}"
     puts "=> ?? "
     puts ""
+  end
+
+  private
+
+  def set_name
+    self.name = 'DeepMind'
   end
 end
 
@@ -85,11 +91,7 @@ class Deck
         @cards << Card.new(suit, value)
       end
     end
-    randomize!
-  end
-
-  def randomize!
-    cards.shuffle!
+    @cards.shuffle!
   end
 
   def deal_one
@@ -147,6 +149,8 @@ class Card
 end
 
 class Game
+  DEALER_MIN = 17
+  NUM_OF_WINS = 3
   attr_accessor :deck, :dealer, :player
 
   def initialize
@@ -154,6 +158,48 @@ class Game
     @deck = Deck.new
     @dealer = Dealer.new
     @player = Player.new
+  end
+
+  def start
+    greeting
+    loop do
+      reset_score
+      loop do
+        shuffle_and_deal
+
+        player_turn
+        if player.busted?
+          calculate_and_display_result
+          break if game_over?
+          next
+        end
+
+        dealer_turn
+
+        show_hands
+        calculate_and_display_result
+        break if game_over?
+      end
+      break unless play_again?
+    end
+  end
+
+  private
+
+  def calculate_and_display_result
+    determine_result
+    update_score
+    display_winner
+  end
+
+  def game_over?
+    player.score >= NUM_OF_WINS || dealer.score >= NUM_OF_WINS
+  end
+
+  def shuffle_and_deal
+    reset
+    deal_cards
+    show_flop
   end
 
   def continue
@@ -164,21 +210,18 @@ class Game
   def greeting
     system 'clear'
     puts "Welcome to Twenty-One! This is a simplified version of the very
-    popular card game called Blackjack. Have fun!"
+    popular card game called Blackjack. First to 3 wins. Have fun!"
     puts ''
     continue
   end
 
   def request_action
-    puts "Would you like to (h)it or (s)tay?"
-    gets.chomp.downcase
-  end
-
-  def validate_answer(answer)
+    answer = nil
     loop do
+      puts "Would you like to (h)it or (s)tay?"
+      answer = gets.chomp.downcase
       break if ['h', 'hit', 's', 'stay'].include?(answer)
       puts "Sorry, not a valid response."
-      answer = request_action
     end
     answer
   end
@@ -207,7 +250,6 @@ class Game
   def player_turn
     loop do
       answer = request_action
-      answer = validate_answer(answer)
       system 'clear'
       if stay?(answer)
         player_stays
@@ -226,17 +268,13 @@ class Game
     loop do
       dealer.show_hand
       sleep 1
-      break if dealer.total > 16
+      break if dealer.total >= DEALER_MIN
       puts "#{dealer.name} draws a card."
       sleep 1
       dealer.add_card(deck.deal_one)
     end
     continue
     system 'clear'
-  end
-
-  def show_busted
-    puts "#{player.name} busted! #{dealer.name} wins!"
   end
 
   def play_again?
@@ -255,27 +293,6 @@ class Game
     self.deck = Deck.new
     player.cards = []
     dealer.cards = []
-  end
-
-  def start
-    greeting
-    loop do
-      reset
-      deal_cards
-      show_flop
-
-      player_turn
-      if player.busted?
-        show_busted
-        play_again? ? next : break
-      end
-
-      dealer_turn
-
-      show_hands
-      determine_result
-      break unless play_again?
-    end
   end
 
   def deal_cards
@@ -306,16 +323,65 @@ class Game
   def determine_result
     dealer_name = dealer.name
     player_name = player.name
+    dealer_total = dealer.total
+    player_total = player.total
     output = if dealer.busted?
                "#{dealer_name} busted! #{player_name} wins!"
-             elsif player.total > dealer.total
+             elsif player.busted?
+               "#{player_name} busted! #{dealer_name} wins!"
+             elsif player_total > dealer_total
                "#{player_name} wins!"
-             elsif dealer.total > player.total
+             elsif dealer_total > player_total
                "#{dealer_name} wins!"
              else
                "It's a tie!"
              end
     puts output
+  end
+
+  def reset_score
+    player.score = 0
+    dealer.score = 0
+  end
+
+  def calibrate(total)
+    total > 21 ? (total % 21) : total
+  end
+
+  def update_score
+    player_total = calibrate(player.total)
+    dealer_total = calibrate(dealer.total)
+    if dealer.busted? || (player_total > dealer_total)
+      player.score += 1
+    elsif player.busted? || (dealer_total > player_total)
+      dealer.score += 1
+    end
+  end
+
+  def display_score
+    player_score = player.score
+    dealer_score = dealer.score
+    output = if player_score > dealer_score
+               "#{player.name} is winning #{player_score}:#{dealer_score}!"
+             elsif dealer_score > player_score
+               "#{dealer.name} is winning #{dealer_score}:#{player_score}!"
+             else
+               "The score is tied #{player_score}:#{dealer_score}!"
+             end
+    puts output
+    continue
+  end
+
+  def display_winner
+    player_score = player.score
+    dealer_score = dealer.score
+    if player_score >= NUM_OF_WINS
+      puts "#{player.name} wins #{player_score}:#{dealer_score}!"
+    elsif dealer_score >= NUM_OF_WINS
+      puts "#{dealer.name} wins #{dealer_score}:#{player_score}!"
+    else
+      display_score
+    end
   end
 end
 
