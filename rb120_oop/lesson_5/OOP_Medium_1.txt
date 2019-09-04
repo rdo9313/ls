@@ -1,0 +1,62 @@
+#Privacy
+class Machine
+  def start
+    flip_switch(:on)
+  end
+
+  def stop
+    flip_switch(:off)
+  end
+
+  private
+
+  attr_writer :switch
+
+  def flip_switch(desired_state)
+    self.switch = desired_state
+  end
+end
+
+#Fixed Array
+class FixedArray
+  def initialize(size)
+    @array = Array.new(size)
+  end
+
+  def [](index)
+    @array.fetch(index)
+  end
+
+  def []=(index, value)
+    self[index]
+    @array[index] = value
+  end
+
+  def to_a
+    @array.clone
+  end
+
+  def to_s
+    "#{@array}"
+  end
+end
+
+#Students
+class Student
+  def initialize(name, year)
+    @name = name
+    @year = year
+  end
+end
+
+class Graduate < Student
+  def initialize(name, year, parking)
+    super(name, year)
+    @parking = parking
+  end
+end
+
+class Undergraduate < Student
+end
+
+#Circular Queue
