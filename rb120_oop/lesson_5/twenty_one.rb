@@ -164,27 +164,31 @@ class Game
     greeting
     loop do
       reset_score
-      loop do
-        shuffle_and_deal
-
-        player_turn
-        if player.busted?
-          calculate_and_display_result
-          break if game_over?
-          next
-        end
-
-        dealer_turn
-
-        show_hands
-        calculate_and_display_result
-        break if game_over?
-      end
+      play_round
       break unless play_again?
     end
   end
 
   private
+
+  def play_round
+    loop do
+      shuffle_and_deal
+
+      player_turn
+      if player.busted?
+        calculate_and_display_result
+        break if game_over?
+        next
+      end
+
+      dealer_turn
+
+      show_hands
+      calculate_and_display_result
+      break if game_over?
+    end
+  end
 
   def calculate_and_display_result
     determine_result
@@ -345,7 +349,7 @@ class Game
   end
 
   def calibrate(total)
-    total > 21 ? (total % 21) : total
+    total > Hand::MAX_VALUE ? (total % Hand::MAX_VALUE) : total
   end
 
   def update_score
