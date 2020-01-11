@@ -1,0 +1,49 @@
+Question 1
+Ben is correct. attr_reader means that balance refers to the instance varibale
+@balance.
+
+Question 2
+changed quantity to @quantity
+
+Question 3
+This is a vaild way of fixing it. However, now changing the quantity through
+the quantity setter method is exposed.
+
+Question 4
+class Greeting
+  def greet(message)
+    puts message
+  end
+end
+
+class Hello < Greeting
+  def hi
+    greet("Hello")
+  end
+end
+
+class Goodbye < Greeting
+  def bye
+    greet("Goodbye")
+  end
+end
+
+Question 5
+class KrispyKreme
+  def initialize(filling_type, glazing)
+    @filling_type = filling_type == nil ? 'Plain' : filling_type
+    @glazing = glazing
+  end
+
+  def to_s
+    "#{@filling_type} with #{@glazing}"
+  end
+end
+
+Question 6
+The first method uses an instance variable and getter method 'template',
+while second method refers to self (instance object) for both setting
+and getting.
+
+Question 7
+light_information --> information
