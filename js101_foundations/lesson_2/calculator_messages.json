@@ -1,0 +1,22 @@
+{
+  "en": {
+    "greeting": "Welcome to Calculator!",
+    "first_num": "What's the first number?",
+    "second_num": "What's the second number?",
+    "invalid_input": "Hmm... that doesn't look like a valid number.",
+    "operation": "What operation would you like to perform?\n1) Add 2) Subtract 3) Multiply 4) Divide",
+    "user_choice": "Must choose 1, 2, 3 or 4",
+    "again": "Would you like to perform another calculation?(y/n)",
+    "valid": "Please choose a valid input (y/n):",
+    "goodbye": "See you again!"
+  },
+  "jp": {
+    "greeting": "最高の電卓",
+    "first_num": "一番は何ですか？",
+    "second_num": "二番は何ですか？",
+    "invalid_input": "無効な番号です。",
+    "operation": "演算を選んでください。１）足し算　２）引き算　３）掛け算　４）割り算",
+    "user_choice": "1, 2, 3, 4 の中で選んでください。",
+    "again": "また行く？"
+  }
+}
