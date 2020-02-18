@@ -14,7 +14,7 @@ function invalidNumber(number) {
 }
 
 while (true) {
-  console.clear()
+  console.clear();
   prompt(messages('greeting'));
 
   prompt(messages('first_num'));
