@@ -9,38 +9,27 @@ function messages(message, lang = 'en') {
   return MESSAGES[lang][message];
 }
 
-function invalidNumber(number) {
+function isInvalidNumber(number) {
   return number.trimStart() === '' || Number.isNaN(Number(number));
 }
 
-while (true) {
-  console.clear();
-  prompt(messages('greeting'));
+function isInvalidOperation(operation) {
+  return !['1','2','3','4'].includes(operation);
+}
 
-  prompt(messages('first_num'));
-  let number1 = readline.question();
+function isInvalidInput(input) {
+  return !['y','yes','n','no'].includes(input);
+}
 
-  while (invalidNumber(number1)) {
-    prompt(messages('invalid_input'));
-    number1 = readline.question();
-  }
+function isValidInput(input) {
+  return ['n', 'no'].includes(input);
+}
 
-  prompt(messages('second_num'));
-  let number2 = readline.question();
+function isZero(num) {
+  return Number(num) === 0;
+}
 
-  while (invalidNumber(number2)) {
-    prompt(messages('invalid_input'));
-    number2 = readline.question();
-  }
-
-  prompt(messages('operation'));
-  let operation = readline.question();
-
-  while (!['1','2','3','4'].includes(operation)) {
-    prompt(messages('user_choice'));
-    operation = readline.question();
-  }
-
+function calculation(operation, number1, number2) {
   let output;
   switch (operation) {
     case '1':
@@ -56,18 +45,50 @@ while (true) {
       output = Number(number1) / Number(number2);
       break;
   }
+  return output;
+}
+
+while (true) {
+  console.clear();
+  prompt(messages('greeting'));
+
+  prompt(messages('first_num'));
+  let number1 = readline.question();
+
+  while (isInvalidNumber(number1)) {
+    prompt(messages('invalid_input'));
+    number1 = readline.question();
+  }
+
+  prompt(messages('second_num'));
+  let number2 = readline.question();
+
+  while (isInvalidNumber(number2) || isZero(number2)) {
+    prompt(messages('invalid_input'));
+    number2 = readline.question();
+  }
+
+  prompt(messages('operation'));
+  let operation = readline.question();
+
+  while (isInvalidOperation(operation)) {
+    prompt(messages('user_choice'));
+    operation = readline.question();
+  }
+
+  let output = calculation(operation, number1, number2);
 
   prompt(`The result is: ${output}`);
 
   prompt(messages('again'));
-  let again = readline.question();
+  let again = readline.question().toLowerCase();
 
-  while (!['y','yes','n','no'].includes(again.toLowerCase())) {
+  while (isInvalidInput(again)) {
     prompt(messages('valid'));
-    again = readline.question();
+    again = readline.question().toLowerCase();
   }
 
-  if (['n', 'no'].includes(again.toLowerCase())) break;
+  if (isValidInput(again)) break;
 }
 
 prompt(messages("goodbye"));
