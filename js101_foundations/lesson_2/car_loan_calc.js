@@ -1,13 +1,13 @@
 // Car Loan Payment Calculator
 const readline = require('readline-sync');
+const MESSAGES = require('./car_loan_messages.json');
 
 function prompt(message) {
   console.log(`=> ${message}`);
 }
 
 function greeting() {
-  prompt("Welcome to car payment calculator.");
-  prompt("Press enter to continue:");
+  prompt(MESSAGES["greeting"]);
   readline.question();
 }
 
@@ -19,6 +19,11 @@ function isInvalidNumber(number) {
 function isInvalidAPR(number) {
   return number.trimStart() === '' || Number.isNaN(Number(number))
   || Number(number) < 0;
+}
+
+function isInvalidMonth(number) {
+  return number.trimStart() === '' || Number.isNaN(Number(number))
+  || !Number.isInteger(Number(number)) || Number(number) < 1;
 }
 
 function calculatePmt(amt, apr, months) {
@@ -42,48 +47,92 @@ function isNo(input) {
   return ['n','no'].includes(input);
 }
 
+function getAmount() {
+  prompt(MESSAGES["amount"]);
+  let answer = readline.question();
+  return answer;
+}
+
+function getValidAmount() {
+  prompt(MESSAGES["validAmount"]);
+  let answer = readline.question();
+  return answer;
+}
+
+function getAPR() {
+  prompt(MESSAGES["apr"]);
+  let answer = readline.question();
+  return answer;
+}
+
+function getValidAPR() {
+  prompt(MESSAGES["validAPR"]);
+  let answer = readline.question();
+  return answer;
+}
+
+function getMonths() {
+  prompt(MESSAGES["months"]);
+  let answer = readline.question();
+  return answer;
+}
+
+function getValidMonths() {
+  prompt(MESSAGES["validMonths"]);
+  let answer = readline.question();
+  return answer;
+}
+
+function displayMonthlyPmt(monthlyPmt) {
+  console.log(`Your monthly payment is $${monthlyPmt.toFixed(2)}.`);
+}
+
+function getAgain() {
+  prompt(MESSAGES["again"]);
+  let answer = readline.question().toLowerCase();
+  return answer;
+}
+
+function getValidAgain() {
+  prompt(MESSAGES["validAgain"]);
+  let answer = readline.question().toLowerCase();
+  return answer;
+}
+
 function goodbye() {
-  prompt("Thank you for using our service. See you again!");
+  prompt(MESSAGES["goodbye"]);
 }
 
 greeting();
 
 while (true) {
   console.clear();
-  prompt("Please enter a loan amount:");
-  let amt = readline.question();
+  let amt = getAmount();
 
   while (isInvalidNumber(amt)) {
-    prompt("Please enter a valid amount:");
-    amt = readline.question();
+    amt = getValidAmount();
   }
 
-  prompt("Please enter the APR (enter 5 for 5%):");
-  let apr = readline.question();
+  let apr = getAPR();
 
   while (isInvalidAPR(apr)) {
-    prompt("Please enter a valid APR:");
-    apr = readline.question();
+    apr = getValidAPR();
   }
 
-  prompt("Please enter the loan duration in months:");
-  let months = readline.question();
+  let months = getMonths();
 
-  while (isInvalidNumber(months)) {
-    prompt("Please enter a valid duration:");
-    months = readline.question();
+  while (isInvalidMonth(months)) {
+    months = getValidMonths();
   }
 
   let monthlyPmt = calculatePmt(amt, apr, months);
 
-  console.log(`Your monthly payment is $${monthlyPmt.toFixed(2)}.`);
+  displayMonthlyPmt(monthlyPmt);
 
-  prompt("Would you like to calculate another loan? (y/n)");
-  let again = readline.question().toLowerCase();
+  let again = getAgain();
 
   while (isInvalidInput(again)) {
-    prompt("Please input 'y' or 'n':");
-    again = readline.question().toLowerCase();
+    again = getValidAgain();
   }
 
   if (isNo(again)) break;

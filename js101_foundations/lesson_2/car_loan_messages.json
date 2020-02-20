@@ -1,0 +1,12 @@
+{
+  "greeting": "Welcome to car payment calculator.\nPress enter to continue:",
+  "amount": "Please enter a loan amount:",
+  "validAmount": "Please enter a valid amount:",
+  "apr": "Please enter the APR (enter 5 for 5%):",
+  "validAPR": "Please enter a valid APR:",
+  "months": "Please enter the loan duration in months:",
+  "validMonths": "Please enter a valid duration:",
+  "again": "Would you like to calculate another loan? (y/n)",
+  "validAgain": "Please input 'y' or 'n':",
+  "goodbye": "Thank you for using our service. See you again!"
+}
