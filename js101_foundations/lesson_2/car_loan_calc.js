@@ -53,10 +53,12 @@ function getAmount() {
   return answer;
 }
 
-function getValidAmount() {
-  prompt(MESSAGES["validAmount"]);
-  let answer = readline.question();
-  return answer;
+function getValidAmount(amt) {
+  while (isInvalidNumber(amt)) {
+    prompt(MESSAGES["validAmount"]);
+    amt = readline.question();
+  }
+  return amt;
 }
 
 function getAPR() {
@@ -65,10 +67,12 @@ function getAPR() {
   return answer;
 }
 
-function getValidAPR() {
-  prompt(MESSAGES["validAPR"]);
-  let answer = readline.question();
-  return answer;
+function getValidAPR(apr) {
+  while (isInvalidAPR(apr)) {
+    prompt(MESSAGES["validAPR"]);
+    apr = readline.question();
+  }
+  return apr;
 }
 
 function getMonths() {
@@ -77,10 +81,12 @@ function getMonths() {
   return answer;
 }
 
-function getValidMonths() {
-  prompt(MESSAGES["validMonths"]);
-  let answer = readline.question();
-  return answer;
+function getValidMonths(months) {
+  while (isInvalidMonth(months)) {
+    prompt(MESSAGES["validMonths"]);
+    months = readline.question();
+  }
+  return months;
 }
 
 function displayMonthlyPmt(monthlyPmt) {
@@ -93,10 +99,12 @@ function getAgain() {
   return answer;
 }
 
-function getValidAgain() {
-  prompt(MESSAGES["validAgain"]);
-  let answer = readline.question().toLowerCase();
-  return answer;
+function getValidAgain(again) {
+  while (isInvalidInput(again)) {
+    prompt(MESSAGES["validAgain"]);
+    again = readline.question().toLowerCase();
+  }
+  return again;
 }
 
 function goodbye() {
@@ -108,32 +116,20 @@ greeting();
 while (true) {
   console.clear();
   let amt = getAmount();
-
-  while (isInvalidNumber(amt)) {
-    amt = getValidAmount();
-  }
+  amt = getValidAmount(amt);
 
   let apr = getAPR();
-
-  while (isInvalidAPR(apr)) {
-    apr = getValidAPR();
-  }
+  apr = getValidAPR(apr);
 
   let months = getMonths();
-
-  while (isInvalidMonth(months)) {
-    months = getValidMonths();
-  }
+  months = getValidMonths(months);
 
   let monthlyPmt = calculatePmt(amt, apr, months);
 
   displayMonthlyPmt(monthlyPmt);
 
   let again = getAgain();
-
-  while (isInvalidInput(again)) {
-    again = getValidAgain();
-  }
+  again = getValidAgain(again);
 
   if (isNo(again)) break;
 }
