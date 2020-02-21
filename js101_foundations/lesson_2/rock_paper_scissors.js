@@ -1,5 +1,6 @@
 // Rock Paper Scissors
 const readline = require('readline-sync');
+const MSG = require('./rps.json');
 const WINNING_COMBOS = {
                   rock:  ['scissors', 'lizard'],
                   paper: ['rock', 'spock'],
@@ -14,17 +15,17 @@ function prompt(message) {
 }
 
 function nextStep() {
-  prompt("Please enter any key to continue:");
+  prompt(MSG["next"]);
   readline.question();
 }
 
 function greeting() {
-  prompt("Welcome to Rock Paper Scissors Lizard Spock.");
+  prompt(MSG["welcome"]);
   nextStep();
 }
 
 function getChoice() {
-  prompt('Choose one: (r)ock, (p)aper, (s)cissors, (l)izard, (sp)ock');
+  prompt(MSG["choice"]);
   return readline.question().toLowerCase();
 }
 
@@ -52,7 +53,7 @@ function isInvalidChoice(choice) {
 function getValidChoice(choice) {
   choice = convert(choice);
   while (isInvalidChoice(choice)) {
-    prompt("Please enter a valid choice:");
+    prompt(MSG["valid_choice"]);
     choice = convert(readline.question().toLowerCase());
   }
   return choice;
@@ -78,13 +79,13 @@ function isInvalidInput(input) {
 }
 
 function getAgain() {
-  prompt("Do you want to play again (y/n)?");
+  prompt(MSG["again"]);
   return readline.question().toLowerCase();
 }
 
 function getValidAgain(again) {
   while (isInvalidInput(again)) {
-    prompt("Please enter 'y' or 'n':");
+    prompt(MSG["valid_again"]);
     again = readline.question().toLowerCase();
   }
   return again;
@@ -116,7 +117,7 @@ function updateScore(winner, score) {
 }
 
 function gameOver(score) {
-  return score["player"] > 2 || score["computer"] > 2;
+  return score["player"] > 4 || score["computer"] > 4;
 }
 
 function displayFinalScore(score) {
@@ -131,7 +132,7 @@ function displayFinalScore(score) {
 }
 
 function goodbye() {
-  prompt("Thanks for playing RPSLS. See you again!");
+  prompt(MSG["goodbye"]);
 }
 
 greeting();
