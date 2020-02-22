@@ -46,13 +46,13 @@ function convertAcronymToFull(choice) {
   }
 }
 
-function isInvalidChoice(choice) {
+function isInvalidPlayerChoice(choice) {
   return !VALID_CHOICES.includes(choice);
 }
 
 function getValidChoice(choice) {
   choice = convertAcronymToFull(choice);
-  while (isInvalidChoice(choice)) {
+  while (isInvalidPlayerChoice(choice)) {
     prompt(MSG["valid_choice"]);
     choice = convertAcronymToFull(readline.question().toLowerCase());
   }
@@ -98,7 +98,7 @@ function askPlayAgain(again) {
   return again;
 }
 
-function displayChoices(choice, computerChoice) {
+function displayResult(choice, computerChoice) {
   prompt(`You chose ${choice}, computer chose ${computerChoice}`);
 }
 
@@ -156,7 +156,7 @@ while (true) {
     let choice = getPlayerChoice();
     choice = getValidChoice(choice);
 
-    displayChoices(choice, computerChoice);
+    displayResult(choice, computerChoice);
 
     let winner = getWinner(choice, computerChoice);
     displayWinner(winner);
