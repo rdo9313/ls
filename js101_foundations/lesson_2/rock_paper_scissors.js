@@ -14,22 +14,22 @@ function prompt(message) {
   console.log(`=> ${message}`);
 }
 
-function nextStep() {
+function askToContinue() {
   prompt(MSG["next"]);
   readline.question();
 }
 
 function greeting() {
   prompt(MSG["welcome"]);
-  nextStep();
+  askToContinue();
 }
 
-function getChoice() {
+function getPlayerChoice() {
   prompt(MSG["choice"]);
   return readline.question().toLowerCase();
 }
 
-function convert(choice) {
+function convertAcronymToFull(choice) {
   switch (choice) {
     case 'r':
       return 'rock';
@@ -51,10 +51,10 @@ function isInvalidChoice(choice) {
 }
 
 function getValidChoice(choice) {
-  choice = convert(choice);
+  choice = convertAcronymToFull(choice);
   while (isInvalidChoice(choice)) {
     prompt(MSG["valid_choice"]);
-    choice = convert(readline.question().toLowerCase());
+    choice = convertAcronymToFull(readline.question().toLowerCase());
   }
   return choice;
 }
@@ -62,29 +62,36 @@ function getValidChoice(choice) {
 function getWinner(choice, computerChoice) {
   let winner;
   if (WINNING_COMBOS[choice].includes(computerChoice)) {
-    prompt("You win!");
     winner = 'player';
   } else if (WINNING_COMBOS[computerChoice].includes(choice)) {
-    prompt("Computer wins!");
     winner = 'computer';
   } else {
-    prompt("It's a tie!");
     winner = 'tie';
   }
   return winner;
 }
 
-function isInvalidInput(input) {
+function displayWinner(winner) {
+  if (winner === "player") {
+    prompt("You win!");
+  } else if (winner === "computer") {
+    prompt("Computer wins!");
+  } else {
+    prompt("It's a tie!");
+  }
+}
+
+function isInvalidPlayerAnswer(input) {
   return !['y','yes','n','no'].includes(input);
 }
 
-function getAgain() {
+function playAgain() {
   prompt(MSG["again"]);
   return readline.question().toLowerCase();
 }
 
-function getValidAgain(again) {
-  while (isInvalidInput(again)) {
+function askPlayAgain(again) {
+  while (isInvalidPlayerAnswer(again)) {
     prompt(MSG["valid_again"]);
     again = readline.question().toLowerCase();
   }
@@ -146,24 +153,25 @@ while (true) {
     let randomIndex = Math.floor(Math.random() * VALID_CHOICES.length);
     let computerChoice = VALID_CHOICES[randomIndex];
 
-    let choice = getChoice();
+    let choice = getPlayerChoice();
     choice = getValidChoice(choice);
 
     displayChoices(choice, computerChoice);
 
     let winner = getWinner(choice, computerChoice);
+    displayWinner(winner);
     updateScore(winner, score);
 
     if (!gameOver(score)) {
       displayScore(score);
-      nextStep();
+      askToContinue();
     }
   }
 
   displayFinalScore(score);
 
-  let again = getAgain();
-  again = getValidAgain(again);
+  let again = playAgain();
+  again = askPlayAgain(again);
 
   if (isNo(again)) break;
 }

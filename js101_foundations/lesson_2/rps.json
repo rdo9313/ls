@@ -2,7 +2,7 @@
   "welcome": "Welcome to Rock Paper Scissors Lizard Spock. First to 5 wins!",
   "choice": "Choose one: (r)ock, (p)aper, (s)cissors, (l)izard, (sp)ock",
   "valid_choice": "Please enter a valid choice:",
-  "next": "Please enter any key to continue:",
+  "next": "Please press enter to continue:",
   "again": "Do you want to play again (y/n)?",
   "valid_again": "Please enter 'y' or 'n':",
   "goodbye": "Thanks for playing RPSLS. See you again!"
