@@ -41,4 +41,71 @@ console.log(`The tip is $${tip}`);
 console.log(`The total is $${total}`);
 
 // Sum or Product of Consecutive Integers
-sum or product 
+console.log("Please enter an integer greater than 0:");
+let answer = +readline.prompt();
+
+console.log("Enter \"s\" to compute the sum, or \"p\" to compute the product.");
+let sumOrProduct = readline.prompt().toLowerCase();
+
+let result = 1;
+if (sumOrProduct === 's') {
+  for(let i = 2; i <= answer; i++) {
+    result += i;
+  }
+  result;
+} else if (sumOrProduct === 'p') {
+  for(let i = 1; i <= answer; i++) {
+    result *= i;
+  }
+  result;
+} else {
+  prompt("Not a valid choice.");
+}
+
+// Short Long Short
+function shortLongShort(str1, str2) {
+  if (str1.length > str2.length) {
+    return str2 + str1 + str2;
+  } else {
+    return str1 + str2 + str1;
+  }
+}
+
+// Leap Years (Part 1)
+function isLeapYear(year) {
+  return (year % 4 === 0 && year % 100 !== 0) || (year % 400 === 0);
+}
+
+// Leap Years (Part 2)
+function isLeapYear(year) {
+  if (year > 1752) {
+    return (year % 4 === 0 && year % 100 !== 0) || (year % 400 === 0);
+  } else {
+    return year % 4 === 0;
+  }
+}
+
+// Multiples of 3 and 5
+
+function multisum(num) {
+  let sum = 0;
+  for(let i = 1; i <= num; i++) {
+    if ((i % 3 === 0) || (i % 5 === 0)) {
+      sum += i;
+    }
+  }
+  return sum;
+}
+
+// ASCII String Value
+function asciiValue(str) {
+  let sum = 0;
+
+  for(let i = 0; i < str.length; i++) {
+    sum += str.charCodeAt(i);
+  }
+
+  return sum;
+}
+
+//test
