@@ -107,5 +107,3 @@ function asciiValue(str) {
 
   return sum;
 }
-
-//test
