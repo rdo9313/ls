@@ -94,3 +94,16 @@ const wordSizes = str => {
 }
 
 // Letter Swap
+const swap = str => {
+  let firstLetter;
+  let lastLetter;
+
+  return str.split(' ').map(word => {
+    if (word.length === 1) {
+      return word;
+    }
+    firstLetter = word[0];
+    lastLetter = word[word.length - 1];
+    return lastLetter + word.slice(1, word.length - 1) + firstLetter;
+  }).join(' ');
+}
