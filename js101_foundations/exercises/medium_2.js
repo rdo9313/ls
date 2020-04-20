@@ -109,7 +109,7 @@ const bubbleSort = array => {
 }
 
 // Longest Sentence
-const longestSentence => text => {
+const longestSentence = text => {
   let sentences = text.match(/\w.*?[.!?]/g);
 
   let longest = sentences.reduce((longest,sentence) => {
