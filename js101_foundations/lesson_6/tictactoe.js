@@ -97,6 +97,47 @@ function someoneWon(board) {
   return !!detectWinner(board);
 }
 
+function updateScore(board, score) {
+  if (detectWinner(board) === "Player") {
+    score["player"] += 1;
+  } else {
+    score["computer"] += 1;
+  }
+}
+
+function displayScore(score) {
+  let playerScore = score.player;
+  let computerScore = score.computer;
+
+  if (playerScore > computerScore) {
+    prompt(`Player is winning ${playerScore}:${computerScore}.`);
+  } else if (computerScore > playerScore) {
+    prompt(`Computer is winning ${computerScore}:${playerScore}.`);
+  } else {
+    prompt(`The score is ${playerScore}:${computerScore}.`);
+  }
+}
+
+function displayWinner(score) {
+  let playerScore = score.player;
+  let computerScore = score.computer;
+
+  if (playerScore === WINNING_COUNT) {
+    prompt(`Player won ${playerScore}:${computerScore}. Congratulations!`);
+  } else {
+    prompt(`Computer won ${computerScore}:${playerScore}. Try again!`);
+  }
+}
+
+function asktoContinue() {
+  prompt("Please press enter to continue:");
+  readline.question();
+}
+
+function gameOver(score) {
+  return (score.player >= WINNING_COUNT || score.computer >= WINNING_COUNT);
+}
+
 function joinOr(arr, delimiter = ', ', word = 'or') {
   switch (arr.length) {
     case 0:
@@ -112,25 +153,36 @@ function joinOr(arr, delimiter = ', ', word = 'or') {
 }
 
 while (true) {
-  let board = initializeBoard();
   let score = {player: 0, computer: 0};
 
   while (true) {
+    let board = initializeBoard();
+    while (true) {
+      displayBoard(board);
+
+      playerChoosesSquare(board);
+      if (someoneWon(board) || boardFull(board)) break;
+
+      computerChoosesSquare(board);
+      if (someoneWon(board) || boardFull(board)) break;
+    }
+
     displayBoard(board);
 
-    playerChoosesSquare(board);
-    if (someoneWon(board) || boardFull(board)) break;
+    if (someoneWon(board)) {
+      prompt(`${detectWinner(board)} won!`);
+      updateScore(board, score);
+    } else {
+      prompt("It's a tie!");
+    }
 
-    computerChoosesSquare(board);
-    if (someoneWon(board) || boardFull(board)) break;
-  }
+    if (gameOver(score)) {
+      displayWinner(score);
+      break;
+    }
 
-  displayBoard(board);
-
-  if (someoneWon(board)) {
-    prompt(`${detectWinner(board)} won!`);
-  } else {
-    prompt("It's a tie!");
+    displayScore(score);
+    asktoContinue();
   }
 
   prompt("Play again? (y or n)");
