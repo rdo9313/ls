@@ -1,0 +1,10 @@
+{
+  "welcome": "Welcome to Tic Tac Toe. First to 3 wins!",
+  "first_move": "Who moves first? Enter (p)layer or (c)omputer:",
+  "valid_answer": "Please input a valid answer:",
+  "next": "Please press enter to continue:",
+  "invalid_choice": "Sorry, that's not a valid choice.",
+  "tie": "It's a tie!",
+  "play_again": "Would you like to play again?",
+  "goodbye": "Thanks for playing Tic Tac Toe. See you again!"
+}

@@ -1,5 +1,5 @@
 const readline = require('readline-sync');
-
+const MSG = require('./ttt.json');
 const WINNING_COUNT = 3;
 const INITIAL_MARKER = ' ';
 const HUMAN_MARKER = 'X';
@@ -22,6 +22,10 @@ function initializeBoard() {
   }
 
   return board;
+}
+
+function displayWelcome() {
+  prompt(MSG["welcome"]);
 }
 
 function displayBoard(board) {
@@ -57,7 +61,7 @@ function playerChoosesSquare(board) {
 
     if (emptySquares(board).includes(square)) break;
 
-    prompt("Sorry, that's not a valid choice.");
+    prompt(MSG["invalid"]);
   }
 
   board[square] = HUMAN_MARKER;
@@ -170,12 +174,16 @@ function displayWinner(score) {
   if (playerScore === WINNING_COUNT) {
     prompt(`Player won ${playerScore}:${computerScore}. Congratulations!`);
   } else {
-    prompt(`Computer won ${computerScore}:${playerScore}. Try again!`);
+    prompt(`Computer won ${computerScore}:${playerScore}.`);
   }
 }
 
+function displayTie() {
+  prompt(MSG["tie"]);
+}
+
 function asktoContinue() {
-  prompt("Please press enter to continue:");
+  prompt(MSG["next"]);
   readline.question();
 }
 
@@ -184,11 +192,11 @@ function gameOver(score) {
 }
 
 function playAgain() {
-  prompt("Would you like to play again?");
+  prompt(MSG["play_again"]);
   let answer = readline.question().toLowerCase();
 
   while (!['y', 'yes', 'n', 'no'].includes(answer)) {
-    prompt("Please input a valid answer:");
+    prompt(MSG["valid_answer"]);
     answer = readline.question().toLowerCase();
   }
 
@@ -227,14 +235,14 @@ function alternatePlayer(currentPlayer) {
 
 function validateFirstPlayer(answer) {
   while (!["p", "player", "c", "computer"].includes(answer)) {
-    prompt("Please input a valid answer:");
+    prompt(MSG["valid_answer"]);
     answer = readline.question().toLowerCase();
   }
   return answer;
 }
 
 function determineFirstTurn() {
-  prompt("Who moves first? Enter (p)layer or (c)omputer:");
+  prompt(MSG["first_move"]);
   let answer = readline.question().toLowerCase();
   answer = validateFirstPlayer(answer);
   return answer;
@@ -250,19 +258,24 @@ function playRound(board, currentPlayer) {
   displayBoard(board);
 }
 
+function goodbye() {
+  prompt(MSG["goodbye"]);
+}
+
 while (true) {
   let score = {player: 0, computer: 0};
   let currentPlayer = determineFirstTurn();
 
   while (true) {
     let board = initializeBoard();
+    displayWelcome();
     playRound(board, currentPlayer);
 
     if (someoneWon(board)) {
       prompt(`${detectWinner(board)} won!`);
       updateScore(board, score);
     } else {
-      prompt("It's a tie!");
+      displayTie();
     }
 
     if (gameOver(score)) {
@@ -278,4 +291,4 @@ while (true) {
   if (isNo(again)) break;
 }
 
-prompt("Thanks for playing Tic Tac Toe!");
+goodbye();
