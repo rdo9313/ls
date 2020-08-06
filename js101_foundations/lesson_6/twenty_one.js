@@ -39,21 +39,121 @@ function shuffle(deck) {
 
 function dealCards(deck, player, dealer) {
   for (let count = 0; count < 2; count++) {
-    player.push(deck.pop().join(''));
-    dealer.push(deck.pop().join(''));
+    player.push(deck.pop());
+    dealer.push(deck.pop());
   }
 }
 
-function displayCards(player, dealer) {
-  prompt(`Player: ${player[0]}, ${player[1]}`);
-  prompt(`Dealer: ${dealer[0]}, unknown`);
+function dealCard(deck, player) {
+  player.push(deck.pop());
 }
 
+function total(cards) {
+  let values = cards.map(card => card[0]);
+  let sum = 0;
 
-let deck = initializeDeck();
-shuffle(deck);
-let player = [];
-let dealer = [];
+  values.forEach(value => {
+    if (value === "A") {
+      sum += 11;
+    } else if (['J', 'Q', 'K'].includes(value)) {
+      sum += 10;
+    } else {
+      sum += Number(value);
+    }
+  });
 
-dealCards(deck, player, dealer);
-displayCards(player, dealer);
+  values.filter(value => value === "A").forEach(_ => {
+    if (sum > 21) sum -= 10;
+  });
+
+  return sum;
+}
+
+function displayCards(player) {
+  return player.map(card => card.join("")).join(" ");
+}
+
+function displayTotals(player, dealer) {
+  prompt(`Player: ${displayCards(player)}. Total: ${total(player)}.`);
+  prompt(`Dealer: ${dealer[0].join('')} unknown.`);
+}
+
+function displayDealerTotal(dealer) {
+  prompt(`Dealer: ${displayCards(dealer)}. Total: ${total(dealer)}.`);
+}
+
+function bust(player) {
+  return total(player) > 21;
+}
+
+function isInvalidAnswer(input) {
+  return !['y', 'yes', 'n', 'no'].includes(input);
+}
+
+function playAgain() {
+  prompt("Play again? (y or n)");
+  return readline.question().toLowerCase();
+}
+
+function askPlayAgain(again) {
+  while (isInvalidAnswer(again)) {
+    prompt("Please input a valid answer:");
+    again = readline.question().toLowerCase();
+  }
+
+  return again;
+}
+
+function isNo(again) {
+  return ['n', 'no'].includes(again);
+}
+
+function goodbye() {
+  prompt("Thank you for playing. Goodbye!");
+}
+
+while (true) {
+  let deck = initializeDeck();
+  shuffle(deck);
+  let player = [];
+  let dealer = [];
+
+  dealCards(deck, player, dealer);
+  displayTotals(player, dealer);
+
+  while (true) {
+    prompt("Would you like to hit or stay?");
+    let answer = readline.question().toLowerCase();
+
+    if (answer === "stay") break;
+
+    dealCard(deck, player);
+    displayTotals(player, dealer);
+
+    if (bust(player)) break;
+  }
+
+  if (!bust(player)) {
+    while (total(dealer) < 17) {
+      dealCard(deck, dealer);
+      displayDealerTotal(dealer);
+    }
+
+    if (bust(dealer) || total(player) > total(dealer)) {
+      prompt("You win!");
+    } else if (total(dealer) > total(player)) {
+      prompt("Dealer wins!");
+    } else {
+      prompt("It's a tie!");
+    }
+  } else {
+    prompt("You busted. Dealer wins!");
+  }
+
+  let again = playAgain();
+  again = askPlayAgain(again);
+
+  if (isNo(again)) break;
+}
+
+goodbye();
