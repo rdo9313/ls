@@ -30,11 +30,25 @@ function prompt(msg) {
   console.log(`=> ${msg}`);
 }
 
+function welcome() {
+  console.clear();
+  prompt("Welcome to Twenty-One. This is a simplified version of the popular game Blackjack.");
+  prompt("This is a version without splits, double-downs, and other complext plays.");
+  prompt("Please refer to https://www.blackjack.org/blackjack-rules/ for rules of the original game.");
+  prompt(" ");
+  askToContinue();
+}
+
 function shuffle(deck) {
   for (let idx = deck.length - 1; idx > 0; idx--) {
     let otherIdx = Math.floor(Math.random() * (idx + 1));
     [deck[idx], deck[otherIdx]] = [deck[otherIdx], deck[idx]];
   }
+}
+
+function askToContinue() {
+  prompt("Press enter to continue:");
+  readline.question();
 }
 
 function dealCards(deck, player, dealer) {
@@ -45,6 +59,7 @@ function dealCards(deck, player, dealer) {
 }
 
 function dealCard(deck, player) {
+  console.clear();
   player.push(deck.pop());
 }
 
@@ -73,13 +88,24 @@ function displayCards(player) {
   return player.map(card => card.join("")).join(" ");
 }
 
-function displayTotals(player, dealer) {
+function displayTotals(player, dealer, playerTurn = true) {
+  console.clear();
   prompt(`Player: ${displayCards(player)}. Total: ${total(player)}.`);
-  prompt(`Dealer: ${dealer[0].join('')} unknown.`);
+  if (playerTurn) {
+    prompt(`Dealer: ${dealer[0].join('')} unknown.`);
+  } else {
+    prompt(`Dealer: ${displayCards(dealer)}. Total: ${total(dealer)}.`);
+    askToContinue();
+  }
 }
 
-function displayDealerTotal(dealer) {
-  prompt(`Dealer: ${displayCards(dealer)}. Total: ${total(dealer)}.`);
+function displayDealtCard(player, playerTurn = true) {
+  if (playerTurn) {
+    prompt(`You draw a ${player[player.length - 1].join("")}.`);
+  } else {
+    prompt(`Dealer draws a ${player[player.length - 1].join("")}.`);
+  }
+  askToContinue();
 }
 
 function bust(player) {
@@ -104,6 +130,10 @@ function askPlayAgain(again) {
   return again;
 }
 
+function isInvalidAction(answer) {
+  return !['hit', 'h', 'stay', 's'].includes(answer);
+}
+
 function isNo(again) {
   return ['n', 'no'].includes(again);
 }
@@ -111,6 +141,8 @@ function isNo(again) {
 function goodbye() {
   prompt("Thank you for playing. Goodbye!");
 }
+
+welcome();
 
 while (true) {
   let deck = initializeDeck();
@@ -122,27 +154,43 @@ while (true) {
   displayTotals(player, dealer);
 
   while (true) {
-    prompt("Would you like to hit or stay?");
+    prompt("Would you like to (h)it or (s)tay?");
     let answer = readline.question().toLowerCase();
+    while (isInvalidAction(answer)) {
+      prompt("Please input a valid answer:");
+      answer = readline.question().toLowerCase();
+    }
 
-    if (answer === "stay") break;
+    if (['s', 'stay'].includes(answer)) {
+      console.clear();
+      prompt("You decided to stay.");
+      askToContinue();
+      break;
+    }
 
     dealCard(deck, player);
+    displayDealtCard(player);
     displayTotals(player, dealer);
 
     if (bust(player)) break;
   }
 
   if (!bust(player)) {
+    displayTotals(player, dealer, false);
+
     while (total(dealer) < 17) {
       dealCard(deck, dealer);
-      displayDealerTotal(dealer);
+      displayDealtCard(dealer, false);
+      displayTotals(player, dealer, false);
     }
 
-    if (bust(dealer) || total(player) > total(dealer)) {
-      prompt("You win!");
+    console.clear();
+    if (bust(dealer)) {
+      prompt("Dealer busts. You win!");
+    } else if (total(player) > total(dealer)) {
+      prompt(`You win ${total(player)}:${total(dealer)}!`);
     } else if (total(dealer) > total(player)) {
-      prompt("Dealer wins!");
+      prompt(`Dealer wins ${total(dealer)}:${total(player)}!`);
     } else {
       prompt("It's a tie!");
     }
