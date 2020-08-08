@@ -1,0 +1,12 @@
+{
+  "continue": "Press enter to continue:",
+  "hitOrStay": "Would you like to (h)it or (s)tay?",
+  "playerHits": "You decide to hit.",
+  "playerStays": "You decided to stay.",
+  "dealerHits": "Dealer hits.",
+  "dealerBusts": "Dealer busts. You win!",
+  "playerBusts": "You busted. Dealer wins!",
+  "invalidAnswer": "Please input a valid answer:",
+  "playAgain": "Play again? (y or n)",
+  "goodbye": "Thank you for playing. Goodbye!"
+}
