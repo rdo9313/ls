@@ -5,6 +5,6 @@
   "next": "Please press enter to continue:",
   "invalid_choice": "Sorry, that's not a valid choice.",
   "tie": "It's a tie!",
-  "play_again": "Would you like to play again?",
+  "play_again": "Would you like to play again? (y or n)",
   "goodbye": "Thanks for playing Tic Tac Toe. See you again!"
 }

@@ -8,5 +8,6 @@
   "playerBusts": "You busted. Dealer wins!",
   "invalidAnswer": "Please input a valid answer:",
   "playAgain": "Play again? (y or n)",
+  "tie": "It's a tie!",
   "goodbye": "Thank you for playing. Goodbye!"
 }

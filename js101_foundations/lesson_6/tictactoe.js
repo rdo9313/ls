@@ -25,6 +25,7 @@ function initializeBoard() {
 }
 
 function displayWelcome() {
+  console.clear();
   prompt(MSG["welcome"]);
 }
 
@@ -61,7 +62,7 @@ function playerChoosesSquare(board) {
 
     if (emptySquares(board).includes(square)) break;
 
-    prompt(MSG["invalid"]);
+    prompt(MSG["invalid_choice"]);
   }
 
   board[square] = HUMAN_MARKER;
@@ -146,8 +147,8 @@ function someoneWon(board) {
   return !!detectWinner(board);
 }
 
-function updateScore(board, score) {
-  if (detectWinner(board) === "Player") {
+function updateScore(score, winner) {
+  if (winner === "Player") {
     score["player"] += 1;
   } else {
     score["computer"] += 1;
@@ -262,18 +263,20 @@ function goodbye() {
   prompt(MSG["goodbye"]);
 }
 
+displayWelcome();
+
 while (true) {
   let score = {player: 0, computer: 0};
   let currentPlayer = determineFirstTurn();
 
   while (true) {
     let board = initializeBoard();
-    displayWelcome();
     playRound(board, currentPlayer);
 
     if (someoneWon(board)) {
-      prompt(`${detectWinner(board)} won!`);
-      updateScore(board, score);
+      let winner = detectWinner(board);
+      prompt(`${winner} won!`);
+      updateScore(score, winner);
     } else {
       displayTie();
     }

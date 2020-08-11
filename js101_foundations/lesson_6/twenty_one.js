@@ -152,7 +152,7 @@ function displayResults(player, dealer) {
   } else if (dealerTotal > playerTotal) {
     prompt(`Dealer wins ${dealerTotal}:${playerTotal}!`);
   } else {
-    prompt("It's a tie!");
+    prompt(MSG["tie"]);
   }
 }
 
