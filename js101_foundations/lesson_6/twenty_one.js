@@ -29,6 +29,7 @@ function welcome() {
   console.clear();
   prompt("Welcome to Twenty-One. This is a simplified version of the popular game Blackjack.");
   prompt("This is a version without splits, double-downs, and other complext plays.");
+  prompt(`First to ${WINNING_COUNT} wins!`);
   prompt("Please refer to https://www.blackjack.org/blackjack-rules/ for rules of the original game.");
   askToContinue();
 }
@@ -104,7 +105,7 @@ function displayTotals(player, dealer, playerTurn = true) {
   if (playerTurn) {
     prompt(`Dealer: ${dealer[0].join('')} ?   |  Total: ?`);
   } else {
-    prompt(`Dealer: ${displayCards(dealer)}  |  Total: ${total(dealer)}.`);
+    prompt(`Dealer: ${displayCards(dealer)}  |  Total: ${total(dealer)}`);
     askToContinue();
   }
 }
@@ -138,14 +139,12 @@ function displayStay() {
   askToContinue();
 }
 
-function displayResults(player, dealer) {
+function displayResults(playerTotal, dealerTotal) {
   console.clear();
-  let playerTotal = total(player);
-  let dealerTotal = total(dealer);
 
-  if (bust(player)) {
+  if (playerTotal > 21) {
     prompt(MSG["playerBusts"]);
-  } else if (bust(dealer)) {
+  } else if (dealerTotal > 21) {
     prompt(MSG["dealerBusts"]);
   } else if (playerTotal > dealerTotal) {
     prompt(`You win ${playerTotal}:${dealerTotal}!`);
@@ -169,8 +168,11 @@ function playTurnAfterHit(deck, player, dealer, playerTurn = true) {
 }
 
 function displayTurnResults(score, player, dealer) {
-  displayResults(player, dealer);
-  updateScore(score, player, dealer);
+  let playerTotal = total(player);
+  let dealerTotal = total(dealer);
+
+  displayResults(playerTotal, dealerTotal);
+  updateScore(score, playerTotal, dealerTotal);
   displayScore(score);
 }
 
@@ -197,14 +199,14 @@ function isNo(again) {
   return ['n', 'no'].includes(again);
 }
 
-function updateScore(score, player, dealer) {
-  if (bust(player)) {
+function updateScore(score, playerTotal, dealerTotal) {
+  if (playerTotal > 21) {
     score.dealer += 1;
-  } else if (bust(dealer)) {
+  } else if (dealerTotal > 21) {
     score.player += 1;
-  } else if (total(player) > total(dealer)) {
+  } else if (playerTotal > dealerTotal) {
     score.player += 1;
-  } else if (total(dealer) > total(player)) {
+  } else if (dealerTotal > playerTotal) {
     score.dealer += 1;
   }
 }
