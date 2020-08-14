@@ -1,4 +1,6 @@
 {
+  "welcome": "Welcome to Twenty-One. This is a simplified version of the popular game Blackjack.\nThis is a version without splits, double-downs, and other complext plays.\nPlease refer to https://www.blackjack.org/blackjack-rules/ for rules of the original game.",
+  "numberOfWins": "First to %s wins!",
   "continue": "Press enter to continue:",
   "hitOrStay": "Would you like to (h)it or (s)tay?",
   "playerHits": "You decide to hit.",

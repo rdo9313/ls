@@ -4,6 +4,7 @@ const MSG = require('./twenty_one.json');
 const SUITS = ['s', 'c', 'h', 'd'];
 const VALUES = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
 const WINNING_COUNT = 3;
+const BLACKJACK = 21;
 
 function initializeDeck() {
   let deck = [];
@@ -27,10 +28,8 @@ function lineBreak() {
 
 function welcome() {
   console.clear();
-  prompt("Welcome to Twenty-One. This is a simplified version of the popular game Blackjack.");
-  prompt("This is a version without splits, double-downs, and other complext plays.");
-  prompt(`First to ${WINNING_COUNT} wins!`);
-  prompt("Please refer to https://www.blackjack.org/blackjack-rules/ for rules of the original game.");
+  prompt(MSG["welcome"]);
+  console.log(`${MSG["numberOfWins"]}`, WINNING_COUNT);
   askToContinue();
 }
 
@@ -73,6 +72,14 @@ function dealCard(deck, player) {
   player.push(deck.pop());
 }
 
+function isBusted(total) {
+  return total > BLACKJACK;
+}
+
+function isWon(firstTotal, secondTotal) {
+  return firstTotal > secondTotal;
+}
+
 function total(cards) {
   let values = cards.map(card => card[0]);
   let sum = 0;
@@ -88,7 +95,7 @@ function total(cards) {
   });
 
   values.filter(value => value === "A").forEach(_ => {
-    if (sum > 21) sum -= 10;
+    if (isBusted(sum)) sum -= 10;
   });
 
   return sum;
@@ -121,10 +128,6 @@ function displayDealtCard(player, playerTurn = true) {
   askToContinue();
 }
 
-function bust(player) {
-  return total(player) > 21;
-}
-
 function isInvalidAnswer(input) {
   return !['y', 'yes', 'n', 'no'].includes(input);
 }
@@ -142,13 +145,13 @@ function displayStay() {
 function displayResults(playerTotal, dealerTotal) {
   console.clear();
 
-  if (playerTotal > 21) {
+  if (isBusted(playerTotal)) {
     prompt(MSG["playerBusts"]);
-  } else if (dealerTotal > 21) {
+  } else if (isBusted(dealerTotal)) {
     prompt(MSG["dealerBusts"]);
-  } else if (playerTotal > dealerTotal) {
+  } else if (isWon(playerTotal, dealerTotal)) {
     prompt(`You win ${playerTotal}:${dealerTotal}!`);
-  } else if (dealerTotal > playerTotal) {
+  } else if (isWon(dealerTotal, playerTotal)) {
     prompt(`Dealer wins ${dealerTotal}:${playerTotal}!`);
   } else {
     prompt(MSG["tie"]);
@@ -200,13 +203,13 @@ function isNo(again) {
 }
 
 function updateScore(score, playerTotal, dealerTotal) {
-  if (playerTotal > 21) {
+  if (isBusted(playerTotal)) {
     score.dealer += 1;
-  } else if (dealerTotal > 21) {
+  } else if (isBusted(dealerTotal)) {
     score.player += 1;
-  } else if (playerTotal > dealerTotal) {
+  } else if (isWon(playerTotal, dealerTotal)) {
     score.player += 1;
-  } else if (dealerTotal > playerTotal) {
+  } else if (isWon(dealerTotal, playerTotal)) {
     score.dealer += 1;
   }
 }
@@ -219,9 +222,9 @@ function displayScore(score) {
     prompt(`Dealer wins ${dealerScore}:${playerScore}.`);
   } else if (playerScore === WINNING_COUNT) {
     prompt(`Player wins ${playerScore}:${dealerScore}.`);
-  } else if (dealerScore > playerScore) {
+  } else if (isWon(dealerScore, playerScore)) {
     prompt(`Dealer is winning ${dealerScore}:${playerScore}.`);
-  } else if (playerScore > dealerScore) {
+  } else if (isWon(playerScore, dealerScore)) {
     prompt(`You are winning ${playerScore}:${dealerScore}.`);
   } else {
     prompt(`You are tied ${playerScore}:${dealerScore}.`);
@@ -261,10 +264,11 @@ while (true) {
       }
 
       playTurnAfterHit(deck, player, dealer);
-      if (bust(player)) break;
+      if (isBusted(total(player))) break;
     }
 
-    if (bust(player)) {
+    if (isBusted(total(player))) {
+      displayTotals(player, dealer, false);
       displayTurnResults(score, player, dealer);
     } else {
       while (total(dealer) < 17) {
