@@ -11,7 +11,7 @@ function initializeDeck() {
 
   SUITS.forEach(suit => {
     VALUES.forEach(value => {
-      deck.push({"value": value, "suit": suit });
+      deck.push({value: value, suit: suit });
     });
   });
   shuffle(deck);
