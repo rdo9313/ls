@@ -3,7 +3,7 @@ const MSG = require('./twenty_one.json');
 
 const SUITS = ['s', 'c', 'h', 'd'];
 const VALUES = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
-const WINNING_COUNT = 3;
+const WINNING_SCORE = 3;
 const BLACKJACK = 21;
 
 function initializeDeck() {
@@ -11,7 +11,7 @@ function initializeDeck() {
 
   SUITS.forEach(suit => {
     VALUES.forEach(value => {
-      deck.push([value, suit]);
+      deck.push({"value": value, "suit": suit });
     });
   });
   shuffle(deck);
@@ -29,7 +29,7 @@ function lineBreak() {
 function welcome() {
   console.clear();
   prompt(MSG["welcome"]);
-  console.log(`${MSG["numberOfWins"]}`, WINNING_COUNT);
+  console.log(`${MSG["numberOfWins"]}`, WINNING_SCORE);
   askToContinue();
 }
 
@@ -80,8 +80,12 @@ function isWon(firstTotal, secondTotal) {
   return firstTotal > secondTotal;
 }
 
+function isWinningScore(score) {
+  return score === WINNING_SCORE;
+}
+
 function total(cards) {
-  let values = cards.map(card => card[0]);
+  let values = cards.map(card => card.value);
   let sum = 0;
 
   values.forEach(value => {
@@ -101,8 +105,12 @@ function total(cards) {
   return sum;
 }
 
+function displayCard(card) {
+  return card.value + card.suit;
+}
+
 function displayCards(player) {
-  return player.map(card => card.join("")).join(" ");
+  return player.map(card => displayCard(card)).join(" ");
 }
 
 function displayTotals(player, dealer, playerTurn = true) {
@@ -110,7 +118,7 @@ function displayTotals(player, dealer, playerTurn = true) {
   prompt(`Player: ${displayCards(player)}  |  Total: ${total(player)}`);
   lineBreak();
   if (playerTurn) {
-    prompt(`Dealer: ${dealer[0].join('')} ?   |  Total: ?`);
+    prompt(`Dealer: ${displayCard(dealer[0])} ?   |  Total: ?`);
   } else {
     prompt(`Dealer: ${displayCards(dealer)}  |  Total: ${total(dealer)}`);
     askToContinue();
@@ -120,10 +128,10 @@ function displayTotals(player, dealer, playerTurn = true) {
 function displayDealtCard(player, playerTurn = true) {
   if (playerTurn) {
     prompt(MSG["playerHits"]);
-    prompt(`You draw a ${player[player.length - 1].join("")}.`);
+    prompt(`You draw a ${displayCard(player[player.length - 1])}.`);
   } else {
     prompt(MSG["dealerHits"]);
-    prompt(`Dealer draws a ${player[player.length - 1].join("")}.`);
+    prompt(`Dealer draws a ${displayCard(player[player.length - 1])}.`);
   }
   askToContinue();
 }
@@ -218,9 +226,9 @@ function displayScore(score) {
   let playerScore = score.player;
   let dealerScore = score.dealer;
 
-  if (dealerScore === WINNING_COUNT) {
+  if (isWinningScore(dealerScore)) {
     prompt(`Dealer wins ${dealerScore}:${playerScore}.`);
-  } else if (playerScore === WINNING_COUNT) {
+  } else if (isWinningScore(playerScore)) {
     prompt(`Player wins ${playerScore}:${dealerScore}.`);
   } else if (isWon(dealerScore, playerScore)) {
     prompt(`Dealer is winning ${dealerScore}:${playerScore}.`);
@@ -233,7 +241,7 @@ function displayScore(score) {
 }
 
 function gameOver(score) {
-  return score.player === WINNING_COUNT || score.dealer === WINNING_COUNT;
+  return isWinningScore(score.player) || isWinningScore(score.dealer);
 }
 
 function goodbye() {
