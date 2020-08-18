@@ -37,4 +37,42 @@ function diamond(n) {
   }
 }
 
-// 
+// Now I Know My ABCs
+const isBlockWord = str => {
+  let blocks = ['BObo', 'XKxk', 'DQdq', 'CPcp', 'NAna', 'GTgt', 'REre', 'FSfs', 'JWjw', 'HUhu', 'VIvi', 'LYly', 'ZMzm'];
+  let result = true;
+
+  str.split("").forEach(char => {
+    if (!blocks.some(block => block.match(char))) {
+      result = false;
+    } else {
+      for (let i = 0; i < blocks.length; i++) {
+        if (blocks[i].match(char)) {
+          blocks.splice(i, 1);
+          break;
+        }
+      }
+    }
+  })
+  return result;
+}
+
+// Seeing Stars
+const star = size => {
+  let middleIdx = Math.floor(size / 2);
+
+  for (let i = 0; i < middleIdx; i++) {
+    let array = ['*', '*', '*'];
+    let spaces = ((size - 3) / 2) - i;
+    console.log(' '.repeat(i) + array.join(" ".repeat(spaces)));
+  }
+
+  console.log("*".repeat(size));
+  
+  for (let j = (middleIdx - 1); j >= 0; j--) {
+    let array = ['*', '*', '*'];
+    let spaces = ((size - 3) / 2) - j;
+    console.log(' '.repeat(j) + array.join(" ".repeat(spaces)));
+  }
+}
+
