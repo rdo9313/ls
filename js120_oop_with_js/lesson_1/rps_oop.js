@@ -1,4 +1,4 @@
-const readline = require('readline-sync');
+  const readline = require('readline-sync');
 
 function createPlayer() {
   return {
@@ -25,17 +25,23 @@ function createHuman() {
   let playerObject = createPlayer();
 
   let humanObject = {
+    CHOICES: { r: 'rock', p: 'paper', s: 'scissors', l: 'lizard', sp: 'spock' },
+
     choose() {
       let choice;
 
       while (true) {
-        console.log("Please choose rock, paper, or scissors:");
+        console.log("Please choose (r)ock, (p)aper, (s)cissors, (l)izard, or (sp)ock:");
         choice = readline.question();
-        if (['rock', 'paper', 'scissors', 'lizard', 'spock'].includes(choice)) break;
+        if (['rock', 'paper', 'scissors', 'lizard', 'spock', 'r', 'p', 'l', 's', 'sp'].includes(choice)) break;
         console.log("Sorry, invalid choice");
       }
 
-      this.move = choice;
+      this.move = this.convertMove(choice);
+    },
+
+    convertMove(move) {
+      return ['r', 'p', 's', 'l', 'sp'].includes(move) ? this.CHOICES[move] : move;
     }
   };
 
@@ -55,8 +61,14 @@ const RPSGame = {
   computer: createComputer(),
   maxScore: 5,
 
+  askToContinue() {
+    console.log("Press enter to continue:");
+    readline.question();
+  },
+
   displayGreetingMessage() {
     console.log("Welcome to Rock, Paper, Scissors!");
+    this.askToContinue();
   },
 
   displayGoodbyeMessage() {
@@ -79,7 +91,8 @@ const RPSGame = {
     return winner;
   },
 
-  displayResult() {
+  displayMoves() {
+    console.clear();
     console.log(`You chose: ${this.human.move}`);
     console.log(`The computer chose: ${this.computer.move}`);
   },
@@ -94,6 +107,9 @@ const RPSGame = {
     } else {
       console.log("It's a tie!");
     }
+
+    console.log('----------------------------------------------------------------');
+    this.askToContinue();
   },
 
   updateScore() {
@@ -109,23 +125,20 @@ const RPSGame = {
     let playerScore = this.human.score;
     let computerScore = this.computer.score;
 
-    if (playerScore > computerScore) {
-      console.log(`You are winning ${playerScore}:${computerScore}`);
-    } else if (computerScore > playerScore) {
-      console.log(`You are losing ${playerScore}:${computerScore}`);
-    } else {
-      console.log(`You are tied ${playerScore}:${computerScore}`);
-    }
+    console.log(`Player: ${playerScore}\nComputer: ${computerScore}`);
+    console.log('----------------------------------------------------------------');
   },
 
   gameOver() {
-    return this.human.score === this.maxScore || this.computer.score === this.maxScore;
+    let maxScore = this.maxScore;
+    return this.human.score === maxScore || this.computer.score === maxScore;
   },
 
   displayFinalScore() {
     let playerScore = this.human.score;
     let computerScore = this.computer.score;
 
+    console.clear();
     if (playerScore > computerScore) {
       console.log(`Congratulations in beating the computer ${playerScore}:${computerScore}!`);
     } else {
@@ -134,23 +147,48 @@ const RPSGame = {
   },
 
   playAgain() {
-    console.log("Would you like to play again? (y/n)");
+    console.log('Would you like to play again? (y/n)');
     let answer = readline.question();
-    return answer.toLowerCase()[0] === 'y';
+    while (!['y','n'].includes(answer.toLowerCase())) {
+      console.log('Please enter a valid input. (y/n)');
+      answer = readline.question();
+    }
+
+    console.clear();
+    return answer.toLowerCase() === 'y';
+  },
+
+  resetScore() {
+    this.human.score = 0;
+    this.computer.score = 0;
+  },
+
+  playRound() {
+    console.clear();
+    this.displayScore();
+    this.human.choose();
+    this.computer.choose();
   },
 
   play() {
     this.displayGreetingMessage();
+
     while (true) {
-      this.human.choose();
-      this.computer.choose();
+      this.playRound();
+      this.displayMoves();
       this.displayWinner();
       this.updateScore();
-      this.displayScore();
-      if (!this.playAgain()) break;
+      if (this.gameOver()) {
+        this.displayFinalScore();
+        if (!this.playAgain()) {
+          break;
+        } else {
+          this.resetScore();
+        }
+      }
     }
 
-      this.displayGoodbyeMessage();
+    this.displayGoodbyeMessage();
   }
 };
 
