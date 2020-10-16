@@ -1,4 +1,41 @@
-  const readline = require('readline-sync');
+const readline = require('readline-sync');
+
+// eslint-disable-next-line max-lines-per-function
+function createHistory() {
+  return {
+    humanHistory: [1],
+    computerHistory: [1],
+
+    saveMoves(humanMove, computerMove) {
+      this.humanHistory.push(humanMove);
+      this.computerHistory.push(computerMove);
+    },
+
+    displayRounds() {
+      let match = 1;
+      let round = 1;
+      console.clear();
+      this.humanHistory.forEach((move, idx) => {
+        if (move === 'new') {
+          console.log('');
+          console.log(`Match ${match}`);
+          console.log('----------------------------------------------------------------------------------');
+          match++;
+          round = 1;
+        } else {
+          console.log(`Round ${round}: You chose: ${move}. The computer chose: ${this.computerHistory[idx]}.`);
+          round++;
+        }
+      });
+    },
+
+    newMatch() {
+      // use filter to filter through numbers only, reverse, then get first element to get max number of array. Then add 1 and push to array.
+      this.humanHistory.push();
+      this.computerHistory.push();
+    }
+  };
+}
 
 function createPlayer() {
   return {
@@ -59,6 +96,7 @@ const RPSGame = {
 
   human: createHuman(),
   computer: createComputer(),
+  history: createHistory(),
   maxScore: 5,
 
   askToContinue() {
@@ -168,6 +206,7 @@ const RPSGame = {
     this.displayScore();
     this.human.choose();
     this.computer.choose();
+    this.history.saveMoves(this.human.move, this.computer.move);
   },
 
   play() {
@@ -183,11 +222,13 @@ const RPSGame = {
         if (!this.playAgain()) {
           break;
         } else {
+          this.history.newMatch();
           this.resetScore();
         }
       }
     }
 
+    this.history.displayRounds();
     this.displayGoodbyeMessage();
   }
 };
