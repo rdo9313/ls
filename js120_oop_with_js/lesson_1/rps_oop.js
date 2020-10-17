@@ -16,7 +16,7 @@ function createHistory() {
       let round = 1;
       console.clear();
       this.humanHistory.forEach((move, idx) => {
-        if (move === 'new') {
+        if (typeof move === 'number') {
           console.log('');
           console.log(`Match ${match}`);
           console.log('----------------------------------------------------------------------------------');
@@ -30,9 +30,9 @@ function createHistory() {
     },
 
     newMatch() {
-      // use filter to filter through numbers only, reverse, then get first element to get max number of array. Then add 1 and push to array.
-      this.humanHistory.push();
-      this.computerHistory.push();
+      let match = this.humanHistory.filter(el => typeof el === 'number').reverse()[0] + 1;
+      this.humanHistory.push(match);
+      this.computerHistory.push(match);
     }
   };
 }
@@ -184,7 +184,21 @@ const RPSGame = {
     }
   },
 
+  displayHistory() {
+    console.log('Would you like to view history of rounds? (y/n)');
+    let answer = readline.question();
+    while (!['y','n'].includes(answer.toLowerCase())) {
+      console.log('Please enter a valid input. (y/n)');
+      answer = readline.question();
+    }
+
+    console.clear();
+    return answer.toLowerCase() === 'y';
+  },
+
   playAgain() {
+    this.askToContinue();
+    console.clear();
     console.log('Would you like to play again? (y/n)');
     let answer = readline.question();
     while (!['y','n'].includes(answer.toLowerCase())) {
@@ -219,6 +233,7 @@ const RPSGame = {
       this.updateScore();
       if (this.gameOver()) {
         this.displayFinalScore();
+        if (this.displayHistory()) this.history.displayRounds();
         if (!this.playAgain()) {
           break;
         } else {
@@ -228,7 +243,6 @@ const RPSGame = {
       }
     }
 
-    this.history.displayRounds();
     this.displayGoodbyeMessage();
   }
 };
