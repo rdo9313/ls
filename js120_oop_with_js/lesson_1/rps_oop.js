@@ -48,11 +48,12 @@ function createComputer() {
   let playerObject = createPlayer();
 
   let computerObject = {
+    choices: ['rock', 'paper', 'scissors', 'lizard', 'spock'].reduce((acc, curr) => [...acc, curr, curr, curr], []),
+
     choose() {
-      const choices = ['rock', 'paper', 'scissors', 'lizard', 'spock'];
-      let randomIndex = Math.floor(Math.random() * choices.length);
-      this.move = choices[randomIndex];
-    }
+      let randomIndex = Math.floor(Math.random() * this.choices.length);
+      this.move = this.choices[randomIndex];
+    },
   };
 
   return Object.assign(playerObject, computerObject);
@@ -62,7 +63,7 @@ function createHuman() {
   let playerObject = createPlayer();
 
   let humanObject = {
-    CHOICES: { r: 'rock', p: 'paper', s: 'scissors', l: 'lizard', sp: 'spock' },
+    choices: [['r', 'rock'], ['p', 'paper'], ['s', 'scissors'], ['l', 'lizard'], ['sp', 'spock']],
 
     choose() {
       let choice;
@@ -78,7 +79,7 @@ function createHuman() {
     },
 
     convertMove(move) {
-      return ['r', 'p', 's', 'l', 'sp'].includes(move) ? this.CHOICES[move] : move;
+      return this.choices.filter(subarr => subarr.includes(move))[0][1];
     }
   };
 
@@ -97,7 +98,7 @@ const RPSGame = {
   human: createHuman(),
   computer: createComputer(),
   history: createHistory(),
-  maxScore: 5,
+  maxScore: 3,
 
   askToContinue() {
     console.log("Press enter to continue:");
@@ -105,6 +106,7 @@ const RPSGame = {
   },
 
   displayGreetingMessage() {
+    console.clear();
     console.log("Welcome to Rock, Paper, Scissors!");
     this.askToContinue();
   },
@@ -159,6 +161,19 @@ const RPSGame = {
     }
   },
 
+  updateMovePercentage() {
+    let winner = this.getWinner();
+    let computerChoices = this.computer.choices;
+    let computerMove = this.computer.move;
+    if (winner === "player") {
+      if (computerChoices.filter(str => str === computerMove).length > 1) {
+        computerChoices.splice(computerChoices.indexOf(computerMove), 1);
+      }
+    } else if (winner === "computer") {
+      computerChoices.push(computerMove);
+    }
+  },
+
   displayScore() {
     let playerScore = this.human.score;
     let computerScore = this.computer.score;
@@ -197,7 +212,6 @@ const RPSGame = {
   },
 
   playAgain() {
-    this.askToContinue();
     console.clear();
     console.log('Would you like to play again? (y/n)');
     let answer = readline.question();
@@ -221,6 +235,10 @@ const RPSGame = {
     this.human.choose();
     this.computer.choose();
     this.history.saveMoves(this.human.move, this.computer.move);
+    this.displayMoves();
+    this.displayWinner();
+    this.updateMovePercentage();
+    this.updateScore();
   },
 
   play() {
@@ -228,12 +246,12 @@ const RPSGame = {
 
     while (true) {
       this.playRound();
-      this.displayMoves();
-      this.displayWinner();
-      this.updateScore();
       if (this.gameOver()) {
         this.displayFinalScore();
-        if (this.displayHistory()) this.history.displayRounds();
+        if (this.displayHistory()) {
+          this.history.displayRounds();
+          this.askToContinue();
+        }
         if (!this.playAgain()) {
           break;
         } else {
