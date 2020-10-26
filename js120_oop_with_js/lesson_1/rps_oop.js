@@ -70,15 +70,15 @@ function createHuman() {
 
       while (true) {
         console.log("Please choose (r)ock, (p)aper, (s)cissors, (l)izard, or (sp)ock:");
-        choice = readline.question();
-        if (['rock', 'paper', 'scissors', 'lizard', 'spock', 'r', 'p', 'l', 's', 'sp'].includes(choice)) break;
+        choice = readline.question().toLowerCase();
+        if (this.choices.flat().includes(choice)) break;
         console.log("Sorry, invalid choice");
       }
 
-      this.move = this.convertMove(choice);
+      this.move = this.convertInputToFullChoiceName(choice);
     },
 
-    convertMove(move) {
+    convertInputToFullChoiceName(move) {
       return this.choices.filter(subarr => subarr.includes(move))[0][1];
     }
   };
@@ -107,12 +107,13 @@ const RPSGame = {
 
   displayGreetingMessage() {
     console.clear();
-    console.log("Welcome to Rock, Paper, Scissors!");
+    console.log("Welcome to Rock, Paper, Scissors, Lizard, Spock!");
+    console.log("Please review the rules of the game at https://roshambo.me/rules/");
     this.askToContinue();
   },
 
   displayGoodbyeMessage() {
-    console.log("Thanks for playing Rock, Paper, Scissors. Goodbye!");
+    console.log("Thanks for playing Rock, Paper, Scissors, Lizard, Spock. Goodbye!");
   },
 
   getWinner() {
@@ -137,9 +138,7 @@ const RPSGame = {
     console.log(`The computer chose: ${this.computer.move}`);
   },
 
-  displayWinner() {
-    let winner = this.getWinner();
-
+  displayWinner(winner) {
     if (winner === "player") {
       console.log("You win!");
     } else if (winner === "computer") {
@@ -152,8 +151,7 @@ const RPSGame = {
     this.askToContinue();
   },
 
-  updateScore() {
-    let winner = this.getWinner();
+  updateScore(winner) {
     if (winner === "player") {
       this.human.score += 1;
     } else if (winner === "computer") {
@@ -161,8 +159,7 @@ const RPSGame = {
     }
   },
 
-  updateMovePercentage() {
-    let winner = this.getWinner();
+  updateMovePercentage(winner) {
     let computerChoices = this.computer.choices;
     let computerMove = this.computer.move;
     if (winner === "player") {
@@ -178,6 +175,7 @@ const RPSGame = {
     let playerScore = this.human.score;
     let computerScore = this.computer.score;
 
+    console.log(`First to ${this.maxScore} wins!`);
     console.log(`Player: ${playerScore}\nComputer: ${computerScore}`);
     console.log('----------------------------------------------------------------');
   },
@@ -201,27 +199,27 @@ const RPSGame = {
 
   displayHistory() {
     console.log('Would you like to view history of rounds? (y/n)');
-    let answer = readline.question();
-    while (!['y','n'].includes(answer.toLowerCase())) {
+    let answer = readline.question().toLowerCase();
+    while (!['y','n'].includes(answer)) {
       console.log('Please enter a valid input. (y/n)');
-      answer = readline.question();
+      answer = readline.question().toLowerCase();
     }
 
     console.clear();
-    return answer.toLowerCase() === 'y';
+    return answer === 'y';
   },
 
   playAgain() {
     console.clear();
     console.log('Would you like to play again? (y/n)');
-    let answer = readline.question();
-    while (!['y','n'].includes(answer.toLowerCase())) {
+    let answer = readline.question().toLowerCase();
+    while (!['y','n'].includes(answer)) {
       console.log('Please enter a valid input. (y/n)');
-      answer = readline.question();
+      answer = readline.question().toLowerCase();
     }
 
     console.clear();
-    return answer.toLowerCase() === 'y';
+    return answer === 'y';
   },
 
   resetScore() {
@@ -236,9 +234,11 @@ const RPSGame = {
     this.computer.choose();
     this.history.saveMoves(this.human.move, this.computer.move);
     this.displayMoves();
-    this.displayWinner();
-    this.updateMovePercentage();
-    this.updateScore();
+
+    let winner = this.getWinner();
+    this.displayWinner(winner);
+    this.updateMovePercentage(winner);
+    this.updateScore(winner);
   },
 
   play() {
@@ -254,10 +254,10 @@ const RPSGame = {
         }
         if (!this.playAgain()) {
           break;
-        } else {
-          this.history.newMatch();
-          this.resetScore();
         }
+
+        this.history.newMatch();
+        this.resetScore();
       }
     }
 
