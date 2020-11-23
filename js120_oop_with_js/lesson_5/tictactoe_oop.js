@@ -27,13 +27,11 @@ class Square {
 }
 
 class Board {
-  displayWithClear() {
-    console.clear();
-    console.log("");
-    console.log("");
-    this.display();
-  }
   constructor() {
+    this.reset();
+  }
+
+  reset() {
     this.squares = {};
     for (let counter = 1; counter <= 9; counter++) {
       this.squares[counter] = new Square();
@@ -56,13 +54,24 @@ class Board {
     console.log("");
   }
 
+  displayWithClear() {
+    console.clear();
+    console.log("");
+    console.log("");
+    this.display();
+  }
+
   markSquareAt(key, marker) {
     this.squares[key].setMarker(marker);
   }
 
   unusedSquares() {
     let keys = Object.keys(this.squares);
-    return keys.filter(key => this.squares[key].isUnused());
+    return keys.filter(key => this.isUnusedSquare(key));
+  }
+
+  isUnusedSquare(key) {
+    return this.squares[key].isUnused();
   }
 
   isFull() {
@@ -135,20 +144,38 @@ class TTTGame {
   play() {
     this.displayWelcomeMessage();
 
+    while (true) {
+      this.playRound();
+      if (!this.playAgain()) break;
+    }
+      this.displayGoodbyeMessage();
+  }
+
+  playRound() {
+    this.board.reset();
     this.board.display();
     while (true) {
       this.humanMoves();
       if (this.gameOver()) break;
-
       this.computerMoves();
       if (this.gameOver()) break;
-
       this.board.displayWithClear();
     }
 
-      this.board.displayWithClear();
-      this.displayResults();
-      this.displayGoodbyeMessage();
+    this.board.displayWithClear();
+    this.displayResults();
+  }
+
+  playAgain() {
+    console.log("Would you like to play again?");
+    let answer = readline.question().toLowerCase();
+
+    while (!['y', 'n'].includes(answer)) {
+      console.log("Please input a valid answer.");
+      answer = readline.question().toLowerCase();
+    }
+
+    return answer === 'y';
   }
 
   displayWelcomeMessage() {
@@ -189,14 +216,58 @@ class TTTGame {
   }
 
   computerMoves() {
-    let validChoices = this.board.unusedSquares();
-    let choice;
+    let choice = this.chooseCenterSquare();
 
-    do {
-      choice = Math.floor((9 * Math.random()) + 1).toString();
-    } while (!validChoices.includes(choice));
+    if (!choice) {
+      choice = this.offensiveComputerMove() || this.defensiveComputerMove()
+      || this.findRandomSquare();
+    }
 
     this.board.markSquareAt(choice, this.computer.getMarker());
+  }
+
+  chooseCenterSquare() {
+    return this.board.isUnusedSquare("5") ? "5" : null;
+  }
+
+  pivotalSquare(row, player) {
+    if (this.board.countMarkersFor(player, row) === 2) {
+      let index = row.findIndex(key => this.board.isUnusedSquare(key));
+      if (index >= 0) return row[index];
+    }
+
+    return null;
+  }
+
+  findPivotalSquare(player) {
+    let winningRows =  TTTGame.POSSIBLE_WINNING_ROWS;
+
+    for (let index = 0; index < winningRows.length; index++) {
+      let row = winningRows[index];
+      let key = this.pivotalSquare(row, player);
+      if (key) return key;
+    }
+
+    return null;
+  }
+
+  defensiveComputerMove() {
+    return this.findPivotalSquare(this.human);
+  }
+
+  offensiveComputerMove() {
+    return this.findPivotalSquare(this.computer);
+  }
+
+  findRandomSquare() {
+    let validChoices = this.board.unusedSquares();
+    let square;
+
+    do {
+      square = Math.floor((9 * Math.random()) + 1).toString();
+    } while (!validChoices.includes(square));
+
+    return square;
   }
 
   gameOver() {
