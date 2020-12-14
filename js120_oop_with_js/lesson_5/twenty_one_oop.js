@@ -49,10 +49,6 @@ class Deck {
     return deck;
   }
 
-  shuffle() {
-    randomize(this.cards);
-  }
-
   deal() {
     return this.cards.pop();
   }
@@ -88,19 +84,44 @@ let Hand = {
 };
 
 class Player {
+  static MONEY = 5;
+  static TARGET = Player.MONEY * 2;
+
   constructor() {
+    this.chips = Player.MONEY;
+  }
+
+  winHand() {
+    this.chips += 1;
+  }
+
+  loseHand() {
+    this.chips -= 1;
+  }
+
+  emptyPockets() {
+    return this.chips <= 0;
+  }
+
+  fullPockets() {
+    return this.chips >= Player.TARGET;
+  }
+
+  showPockets() {
+    console.log(`You have ${this.chips} chips.`);
+    console.log("");
   }
 }
 
 class Dealer {
-  constructor() {
-  }
 }
 
 Object.assign(Player.prototype, Hand);
 Object.assign(Dealer.prototype, Hand);
 
 class TwentyOneGame {
+  static MAX_SCORE = 21;
+
   constructor() {
     this.player = new Player();
     this.dealer = new Dealer();
@@ -116,18 +137,27 @@ class TwentyOneGame {
   start() {
     this.displayWelcomeMessage();
     while (true) {
-      this.dealCards();
-      this.showCards();
-      this.playerTurn();
-      if (!this.isBusted(this.player)) {
-        this.dealerTurn();
-      }
-      this.showCards();
-      this.displayResult();
-
+      this.playHand();
+      if (this.player.emptyPockets() || this.player.fullPockets()) break;
       if (!this.playAgain()) break;
     }
+
+    this.displayFinalResult();
     this.displayGoodbyeMessage();
+  }
+
+  playHand() {
+    this.dealCards();
+    this.showCards();
+    this.playerTurn();
+
+    if (!this.isBusted(this.player)) {
+      this.dealerTurn();
+    }
+
+    this.updatePockets();
+    this.showCards();
+    this.displayResult();
   }
 
   dealCards() {
@@ -135,7 +165,7 @@ class TwentyOneGame {
     this.player.resetHand();
     this.dealer.resetHand();
 
-    for (let i = 0; i < 2; i++) {
+    for (let turn = 0; turn < 2; turn++) {
       this.player.draw(this.deck.deal());
       this.dealer.draw(this.deck.deal());
     }
@@ -145,6 +175,7 @@ class TwentyOneGame {
 
   showCards() {
     console.clear();
+    this.player.showPockets();
     this.player.show("Player");
     this.dealer.show("Dealer");
   }
@@ -182,7 +213,7 @@ class TwentyOneGame {
     });
 
     while (aceCount > 0) {
-      if (sum > 21) sum -= 10;
+      if (sum > TwentyOneGame.MAX_SCORE) sum -= 10;
       aceCount -= 1;
     }
 
@@ -190,7 +221,7 @@ class TwentyOneGame {
   }
 
   isBusted(player) {
-    return this.calculateTotal(player) > 21;
+    return this.calculateTotal(player) > TwentyOneGame.MAX_SCORE;
   }
 
   displayPlayerTotal() {
@@ -247,6 +278,21 @@ class TwentyOneGame {
     console.log("Thank you for playing. Goodbye!");
   }
 
+  updatePockets() {
+    let playerTotal = this.calculateTotal(this.player);
+    let dealerTotal = this.calculateTotal(this.dealer);
+
+    if (this.isBusted(this.player)) {
+      this.player.loseHand();
+    } else if (this.isBusted(this.dealer)) {
+      this.player.winHand();
+    } else if (this.isWon(playerTotal, dealerTotal)) {
+      this.player.winHand();
+    } else if (this.isWon(dealerTotal, playerTotal)) {
+      this.player.loseHand();
+    }
+  }
+
   displayResult() {
     if (this.isBusted(this.player)) {
       console.log("You busted!");
@@ -268,6 +314,18 @@ class TwentyOneGame {
 
   isWon(score1, score2) {
     return score1 > score2;
+  }
+
+  displayFinalResult() {
+    console.clear();
+
+    if (this.player.emptyPockets()) {
+      console.log("You are broke. There's always a tomorrow!");
+    } else if (this.player.fullPockets()) {
+      console.log("You beat the house. Great job!");
+    } else {
+      console.log(`You walk out with ${this.player.chips} chips.`);
+    }
   }
 
   playAgain() {
