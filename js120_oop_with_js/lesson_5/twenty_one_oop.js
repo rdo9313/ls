@@ -1,8 +1,9 @@
 const readline = require("readline-sync");
 const randomize = require("shuffle-array");
+const MSG = require('./twenty_one.json');
 
 class Card {
-  static SUITS = ['s', 'c', 'h', 'd'];
+  static SUITS = ['♠', '♦', '♣', '♥'];
   static VALUES = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
   constructor(suit, value) {
     this.suit = suit;
@@ -108,12 +109,15 @@ class Player {
   }
 
   showPockets() {
-    console.log(`You have ${this.chips} chips.`);
+    console.log(`${MSG["showPockets"]}`, this.chips);
     console.log("");
   }
 }
 
 class Dealer {
+  constructor() {
+    this.target = 17;
+  }
 }
 
 Object.assign(Player.prototype, Hand);
@@ -129,9 +133,13 @@ class TwentyOneGame {
 
   askToContinue() {
     console.log("---------------------------------------------------------------");
-    console.log("Press enter to continue:");
+    this.prompt(MSG["continue"]);
     readline.question();
     console.clear();
+  }
+
+  prompt(msg) {
+    console.log(`=> ${msg}`);
   }
 
   start() {
@@ -186,11 +194,11 @@ class TwentyOneGame {
 
   getPlayerAction() {
     this.displayPlayerTotal();
-    console.log("Would you like to (h)it or (s)tay?");
+    this.prompt(MSG["hitOrStay"]);
     let action = readline.question().toLowerCase();
 
     while (!['h', 'hit', 's', 'stay'].includes(action)) {
-      console.log("Please input a valid action:");
+      this.prompt(MSG["invalidAction"]);
       action = readline.question().toLowerCase();
     }
 
@@ -225,11 +233,11 @@ class TwentyOneGame {
   }
 
   displayPlayerTotal() {
-    console.log(`Your total is ${this.calculateTotal(this.player)}.`);
+    console.log(`${MSG["playerTotal"]}`, this.calculateTotal(this.player));
   }
 
   displayDealerTotal() {
-    console.log(`Dealer's total is ${this.calculateTotal(this.dealer)}.`);
+    console.log(`${MSG["dealerTotal"]}`, this.calculateTotal(this.dealer));
   }
 
   playerTurn() {
@@ -242,7 +250,7 @@ class TwentyOneGame {
   }
 
   dealerContinue() {
-    console.log("Press enter to continue:");
+    this.prompt(MSG["continue"]);
     readline.question();
   }
 
@@ -253,7 +261,7 @@ class TwentyOneGame {
 
     while (true) {
       let total = this.calculateTotal(this.dealer);
-      if (total >= 17) break;
+      if (total >= this.dealer.target) break;
       this.showCards();
       this.displayDealerTotal();
       this.dealerContinue();
@@ -264,18 +272,20 @@ class TwentyOneGame {
 
   displayWelcomeMessage() {
     console.clear();
-    console.log("Welcome to Twenty-One. This is a simplified version of the popular game Blackjack.\nThis is a version without splits, double-downs, and other complex plays.\nPlease refer to https://www.blackjack.org/blackjack-rules/ for rules of the original game.");
+    this.prompt(MSG["welcome"]);
+    console.log("");
+    console.log(`${MSG["test"]}`, this.player.chips, Player.TARGET);
     this.askToContinue();
   }
 
   displayDealtCard(player) {
     console.clear();
-    console.log(`A ${player.getLast().display()} is drawn.`);
+    console.log(`${MSG["dealtCard"]}`, player.getLast().display());
     this.askToContinue();
   }
 
   displayGoodbyeMessage() {
-    console.log("Thank you for playing. Goodbye!");
+    this.prompt(MSG["goodbye"]);
   }
 
   updatePockets() {
@@ -295,19 +305,19 @@ class TwentyOneGame {
 
   displayResult() {
     if (this.isBusted(this.player)) {
-      console.log("You busted!");
+      this.prompt(MSG["playerBusts"]);
     } else if (this.isBusted(this.dealer)) {
-      console.log("Dealer busts!");
+      this.prompt(MSG["dealerBusts"]);
     } else {
       let playerTotal = this.calculateTotal(this.player);
       let dealerTotal = this.calculateTotal(this.dealer);
 
       if (this.isWon(playerTotal, dealerTotal)) {
-        console.log(`You win ${playerTotal}:${dealerTotal}!`);
+        console.log(`${MSG["playerWin"]}`, playerTotal, dealerTotal);
       } else if (this.isWon(dealerTotal, playerTotal)) {
-        console.log(`Dealer wins ${dealerTotal}:${playerTotal}!`);
+        console.log(`${MSG["dealerWin"]}`, dealerTotal, playerTotal);
       } else {
-        console.log("It's a tie!");
+        this.prompt(MSG["tie"]);
       }
     }
   }
@@ -320,20 +330,20 @@ class TwentyOneGame {
     console.clear();
 
     if (this.player.emptyPockets()) {
-      console.log("You are broke. There's always a tomorrow!");
+      this.prompt(MSG["isBroke"]);
     } else if (this.player.fullPockets()) {
-      console.log("You beat the house. Great job!");
+      this.prompt(MSG["isChampion"]);
     } else {
-      console.log(`You walk out with ${this.player.chips} chips.`);
+      console.log(`${MSG["walkOut"]}`, this.player.chips);
     }
   }
 
   playAgain() {
-    console.log("Would you like to play again? Enter (y)es or (n)o:");
+    this.prompt(MSG["playAgain"]);
     let answer = readline.question().toLowerCase();
 
     while (!['y', 'yes', 'no', 'n'].includes(answer)) {
-      console.log("That is an invalid input. Please try again (y)es or (n)o:");
+      this.prompt(MSG["invalidPlayAgain"]);
       answer = readline.question().toLowerCase();
     }
 

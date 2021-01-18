@@ -1,0 +1,22 @@
+{
+  "welcome": "Welcome to Twenty-One. This is a simplified version of the popular game Blackjack.\nThis is a version without splits, double-downs, and other complext plays.\nPlease refer to https://www.blackjack.org/blackjack-rules/ for rules of the original game.",
+  "test": "You start with %d chips. The game ends when you accumulate %d chips or go broke trying.",
+  "continue": "Press enter to continue:",
+  "dealtCard": "A %s is drawn.",
+  "hitOrStay": "Would you like to (h)it or (s)tay?",
+  "playerBusts": "You busted!",
+  "dealerBusts": "Dealer busts!",
+  "playerTotal": "Your total score is %d.",
+  "dealerTotal": "Dealer's total is %d.",
+  "playerWin": "You win %d:%d!",
+  "dealerWin": "Dealer wins %d:%d!",
+  "playAgain": "Would you like to play again? Enter (y)es or (n)o:",
+  "invalidPlayAgain": "That is an invalid input. Please try again (y)es or (n)o:",
+  "tie": "It's a tie!",
+  "showPockets": "You currently have %d chips.",
+  "invalidAction": "Please enter a valid action (h)it or (s)tay:",
+  "isBroke": "You are broke. There's always a tomorrow!",
+  "isChampion": "You beat the house. Great job!",
+  "walkOut": "You walk out with %d chips.",
+  "goodbye": "Thank you for playing. Goodbye!"
+}
