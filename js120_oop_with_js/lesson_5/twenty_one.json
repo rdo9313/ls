@@ -1,5 +1,5 @@
 {
-  "welcome": "Welcome to Twenty-One. This is a simplified version of the popular game Blackjack.\nThis is a version without splits, double-downs, and other complext plays.\nPlease refer to https://www.blackjack.org/blackjack-rules/ for rules of the original game.",
+  "welcome": "Welcome to Twenty-One. This is a simplified version of the popular game Blackjack.\nThis is a version without splits, double-downs, and other complex plays.\nPlease refer to https://www.blackjack.org/blackjack-rules/ for rules of the original game.",
   "test": "You start with %d chips. The game ends when you accumulate %d chips or go broke trying.",
   "continue": "Press enter to continue:",
   "dealtCard": "A %s is drawn.",
