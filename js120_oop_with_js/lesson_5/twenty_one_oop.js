@@ -165,7 +165,7 @@ class TwentyOneGame {
 
     this.updatePockets();
     this.showCards();
-    this.displayResult();
+    this.displayRoundResult();
   }
 
   dealCards() {
@@ -303,7 +303,7 @@ class TwentyOneGame {
     }
   }
 
-  displayResult() {
+  displayRoundResult() {
     if (this.isBusted(this.player)) {
       this.prompt(MSG["playerBusts"]);
     } else if (this.isBusted(this.dealer)) {
